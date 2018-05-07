@@ -1,0 +1,4 @@
+mipi.write 0x05 0x28
+delay 100
+mipi.write 0x05 0x10
+delay 100
