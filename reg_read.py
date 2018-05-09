@@ -604,7 +604,7 @@ def reg_process_0xCF( filename, reg_data ):
 
         Start_0XCF_index=14       
         for i in range(6):
-            write_str = "\n       GAMMA_TBL"+str(i)+"S/E:\t"+ str(int(reg_data[Start_0XCF_index+i],16))+"\t"+str(int(reg_data[Start_0XCF_index+1+i],16)) +"\t"+reg_data[Start_0XCF_index+i]+"\t"+reg_data[Start_0XCF_index+1+i]
+            write_str = "\n       GAMMA_TBL"+str(i)+"S/E:\t"+ str(int(reg_data[Start_0XCF_index+2*i],16))+"\t"+str(int(reg_data[Start_0XCF_index+1+2*i],16)) +"\t"+reg_data[Start_0XCF_index+2*i]+"\t"+reg_data[Start_0XCF_index+1+2*i]
             file_to_write.writelines(write_str) 
 
         Start_0XCF_index=26   
@@ -1665,16 +1665,18 @@ if __name__ == '__main__':
     #BOE_to_other(p1,p2)
     #reg_analyze()
     #factory_test()
-    #reg_data=E7422_to_gx(sys.argv[1], ["0xCF","0xD7"])
+    
+    #compare the some register
+    reg_data=E7422_to_gx(sys.argv[1], ["0xCF","0xD7"])
 
     #r66451=reg_file("R66451","./reg_map_R66451.txt")
     #r66451.read_reg_struc_file("./reg_map_R66451.txt")
-    
+    '''for convert Elecs to BOE
     if len(sys.argv)!=1:
         E7422_to_BOE(sys.argv[1])
     else:
         usage_E7422_to_BOE()
-    
+    '''
     #reg_process_0xCF(reg_data)
     #reg_data=E7422_to_gx(sys.argv[1], "0xD7")
     #reg_process_0xD7(reg_data)

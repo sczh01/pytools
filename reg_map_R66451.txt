@@ -633,16 +633,16 @@ SATU_INI2:8 8 0 7 0 7
 SATU_SET2:9 9 0 7 0 7
 DKSATU_SET2:10 10 0 7 0 7
 REG-0xBE:ACO Control3
-BR_INI2:0 0 0 7 0 7
-BR_SET2:1 1 0 7 0 7
-LO_CR_INI2:2 2 0 7 0 7
-LO_CR_SET2:3 3 0 7 0 7
-GL_CR_SET2:4 4 0 7 0 7
-DKCR_SET2:5 5 0 7 0 7
+    BR_INI2:0 0 0 7 0 7
+    BR_SET2:1 1 0 7 0 7
+ LO_CR_INI2:2 2 0 7 0 7
+ LO_CR_SET2:3 3 0 7 0 7
+ GL_CR_SET2:4 4 0 7 0 7
+  DKCR_SET2:5 5 0 7 0 7
 BR_MID_INI2:6 6 0 7 0 7
-BR_MID2:7 7 0 7 0 7
-SATU_INI2:8 8 0 7 0 7
-SATU_SET2:9 9 0 7 0 7
+    BR_MID2:7 7 0 7 0 7
+  SATU_INI2:8 8 0 7 0 7
+  SATU_SET2:9 9 0 7 0 7
 DKSATU_SET2:10 10 0 7 0 7
 REG-0xBF:Device ID
 REG-0xC0:Slew rate adjustment
@@ -653,15 +653,397 @@ SOUTTF2:0 0 6 7 6 7
 SOUTTR3:1 1 0 1 0 1
 SOUTTF3:1 1 2 3 2 3
 REG-0xC1:Display Setting1
-SS1:
-BGR1
+                    SS1:0  0  2 2 2 2
+                   BGR1:0  0  3 3 3 3
+                    REV:0  0  4 4 4 4
+             SO_CTL_VBP:0  0  6 7 6 7
+                    HRE:1  1  0 2 0 2
+             SO_CTL_VFP:3  3  0 1 0 1
+           SO_CTL_NDISP:3  3  2 3 2 3
+   SO_CTL_NDISP_DISPOFF:3  3  4 5 4 5
+       SO_CTL_ALPM_EXIT:4  4  0 1 0 1
+      SO_CTL_ALPM_ENTER:4  4  2 3 2 3
+             SO_CTL_ISC:4  4  4 5 4 5
+         SO_CTL_ISC_OPT:4  4  7 7 7 7
+           SSW_ODR_F1L3:5  5  0 0 0 0
+           SSW_ODR_F1L2:5  5  1 1 1 1
+           SSW_ODR_F1L1:5  5  2 2 2 2
+           SSW_ODR_F1L0:5  5  3 3 3 3
+           SSW_ODR_F0L3:5  5  4 4 4 4
+           SSW_ODR_F0L2:5  5  5 5 5 5
+           SSW_ODR_F0L1:5  5  6 6 6 6
+           SSW_ODR_F0L0:5  5  7 7 7 7
+           SSW_ODR_F3L3:6  6  0 0 0 0
+           SSW_ODR_F3L2:6  6  1 1 1 1
+           SSW_ODR_F3L1:6  6  2 2 2 2
+           SSW_ODR_F3L0:6  6  3 3 3 3
+           SSW_ODR_F2L3:6  6  4 4 4 4
+           SSW_ODR_F2L2:6  6  5 5 5 5
+           SSW_ODR_F2L1:6  6  6 6 6 6
+           SSW_ODR_F2L0:6  6  7 7 7 7
+         SSW_ODR_VCYCLE:7  7  0 1 0 1
+         SSW_ODR_FCYCLE:7  7  2 3 2 3
+        SSW_EXTEND_MODE:7  7  4 5 4 5
+                 SSW_SL:8  9  0 3 0 7
+             SSW_SL_SEL:8  8  4 4 4 4
+                 SSW_EL:10 11 0 3 0 7
+             SO_CTL_SNT:20 20 0 1 0 1
+        SO_CTL_SNT0_IDL:20 20 2 3 2 3
+         SO_CTL_SNT0_VB:21 21 0 1 0 1
+     SO_CTL_SNT0_VB_IDL:21 21 2 3 2 3
+            SO_PGL_SNT0:22 23 0 1 0 7
+             SO_PGL_VBP:26 27 0 1 0 7
+       SO_AMPOFF_VBP_EL:26 26 4 7 4 7
+             SO_PGL_VFP:26 27 0 1 0 7
+       SO_AMPOFF_VFP_SL:28 28 4 7 4 7
+           SO_PGL_NDISP:28 29 0 1 0 7
+     SO_AMPOFF_NDISP_EL:30 30 4 7 4 7
+             SO_PGL_ISC:30 31 0 1 0 7
+     SO_AMPOFF_NDISP_SL:32 32 4 7 4 7
+        SLEV_AMPOFF_ISC:34 34 0 0 0 0
+    SLEV_AMPOFF_VFP_EXT:34 34 1 1 1 1
+          SO_AMPOFF_ISC:34 34 3 3 3 3
+          SO_AMPOFF_VFP:34 34 4 4 4 4
+          SO_AMPOFF_VBP:34 34 5 5 5 5
+        SO_AMPOFF_NDISP:34 34 6 6 6 6
+SO_AMPOFF_NDISP_DISPOFF:34 34 7 7 7 7
+                STV1_HI:39 40 0 3 0 7
+               STV1_NUM:39 39 4 7 4 7
+                STV1_SL:41 42 0 3 0 7
+               STV1_OFS:41 41 4 7 4 7
+            STV1_SL_SEL:43 43 4 5 4 5
+                STV1_PL:43 43 7 7 7 7
+                STV2_HI:44 45 0 3 0 7
+               STV2_NUM:44 44 4 7 4 7
+                STV2_SL:46 47 0 3 0 7
+               STV2_OFS:46 46 4 7 4 7
+            STV2_SL_SEL:48 48 4 5 4 5
+                STV2_PL:48 48 7 7 7 7
+                STV3_HI:49 50 0 3 0 7
+               STV3_NUM:50 50 4 7 4 7
+                STV3_SL:51 52 0 3 0 7
+               STV3_OFS:51 51 4 7 4 7
+            STV3_SL_SEL:53 53 4 5 4 5
+                STV3_PL:53 53 7 7 7 7
+         STV3_BW_SIGSEL:53 53 0 2 0 2
+          STV3_BW_ORDER:53 53 3 3 3 3
+            STV3_SL_SEL:53 53 4 5 4 5
+                STV4_HI:54 55 0 3 0 7
+               STV4_NUM:54 54 4 7 4 7
+                STV4_SL:56 57 0 3 0 7
+               STV4_OFS:56 56 4 7 4 7
+            STV4_SL_SEL:58 58 4 5 4 5
+                STV4_PL:58 58 7 7 7 7
+               CKV1_PER:59 60 0 3 0 7
+               CKV1_NUM:59 59 4 7 4 7
+                CKV1_HI:61 62 0 3 0 7
+               CKV1_OFS:61 61 4 7 4 7
+          CKV1_START_BW:63 63 0 3 0 3
+             CKV1_START:63 63 4 7 4 7
+                CKV1_SL:64 65 0 3 0 7
+            CKV1_SL_SEL:64 64 4 5 4 5
+                CKV1_PL:64 64 7 7 7 7
+                CKV1_EL:66 67 0 3 0 7
+            CKV1_EL_SEL:66 66 4 5 4 5
+           CKV1_CMB_LFP:68 68 0 1 0 1
+               CKV2_PER:69 70 0 3 0 7
+               CKV2_NUM:69 69 4 7 4 7
+                CKV2_HI:71 72 0 3 0 7
+               CKV2_OFS:71 71 4 7 4 7
+             CKV2_START:73 73 4 7 4 7
+                CKV2_SL:74 75 0 3 0 7
+            CKV2_SL_SEL:74 74 4 5 4 5
+                CKV2_PL:74 74 7 7 7 7
+                CKV2_EL:76 77 0 3 0 7
+            CKV2_EL_SEL:76 76 4 5 4 5
+           CKV2_CMB_LFP:78 78 0 1 0 1
+               CKV3_PER:79 80 0 3 0 7
+               CKV3_NUM:79 79 4 7 4 7
+                CKV3_HI:81 82 0 3 0 7
+               CKV3_OFS:81 81 4 7 4 7
+             CKV3_START:83 83 4 7 4 7
+                CKV3_SL:84 85 0 3 0 7
+            CKV3_SL_SEL:84 84 4 5 4 5
+                CKV4_PL:84 84 7 7 7 7
+                CKV4_EL:86 87 0 3 0 7
+            CKV4_EL_SEL:86 86 4 5 4 5
+           CKV4_CMB_LFP:88 88 0 1 0 1
+               CKV4_PER:89 90 0 3 0 7
+               CKV4_NUM:89 89 4 7 4 7
+                CKV4_HI:91 92 0 3 0 7
+               CKV4_OFS:91 91 4 7 4 7
+             CKV4_START:93 93 4 7 4 7
+                CKV4_SL:94 95 0 3 0 7
+            CKV4_SL_SEL:94 94 4 5 4 5
+                CKV4_PL:94 94 7 7 7 7
+                CKV4_EL:96 97 0 3 0 7
+            CKV4_EL_SEL:96 96 4 5 4 5
+           CKV4_CMB_LFP:98 98 0 1 0 1
+             SEQP1RP_SL:99 100 0 7 4 7 
+             SEQP1RP_EL:100 101 0 3 0 7
+             SEQP2RP_SL:102 103 0 7 4 7 
+             SEQP2RP_EL:103 104 0 3 0 7
+             SEQP3RP_SL:105 106 0 7 4 7 
+             SEQP3RP_EL:106 107 0 3 0 7
+
 REG-0xC2:Display Setting2
+         NL:0 0 0 3 0 7
+        VBP:2 2 0 7 0 7
+        VFP:4 5 0 3 0 7
+    VFP_EXT:6 7 0 7 0 7
+VFP_EXT_FR1:9 10 0 7 0 7
+VFP_EXT_FR2:12 13 0 7 0 7 
+VFP_EXT_FR3:15 16 0 7 0 7
+VFP_EXT_FR4:18 19 0 7 0 7
+     MUXSEL:20 20 1 1 1 1
+
 REG-0xC3:Display Setting3
+                ISC_ON:0 0 4 4 4 4
+           LFR_AUTO_ON:0 0 7 7 7 7
+         FR_TABLE_SEL2:1 1 0 2 0 2
+         FR_TABLE_SEL1:1 1 4 6 4 6
+         FR_TABLE_SEL4:2 2 0 2 0 2
+         FR_TABLE_SEL3:2 2 4 6 4 6
+    LFR_AUTO_DET_FRAME:3 3 0 7 0 7
+ CKV2_STOP_PST_VFP_EXT:4 4 0 1 0 1
+      CKV2_CTL_VFP_EXT:4 4 2 3 2 3
+ CKV1_STOP_PST_VFP_EXT:4 4 4 5 4 5
+      CKV1_CTL_VFP_EXT:4 4 6 7 6 7
+ CKV4_STOP_PST_VFP_EXT:5 5 0 1 0 1
+      CKV4_CTL_VFP_EXT:5 5 2 3 2 3
+ CKV3_STOP_PST_VFP_EXT:5 5 4 5 4 5
+      CKV3_CTL_VFP_EXT:5 5 6 7 6 7
+ LFP1_STOP_PST_VFF_EXT:6 6 0 1 0 1
+      LFP1_CTL_VFP_EXT:6 6 2 3 2 3
+          LFP1_CTL_VFP:6 6 4 5 4 5
+          LFP1_CTL_VBP:6 6 6 7 6 7
+ LFP2_STOP_PST_VFF_EXT:7 7 0 1 0 1
+      LFP2_CTL_VFP_EXT:7 7 2 3 2 3
+          LFP2_CTL_VFP:7 7 4 5 4 5
+          LFP2_CTL_VBP:7 7 6 7 6 7
+ LFP3_STOP_PST_VFF_EXT:8 8 0 1 0 1
+      LFP3_CTL_VFP_EXT:8 8 2 3 2 3
+          LFP3_CTL_VFP:8 8 4 5 4 5
+          LFP3_CTL_VBP:8 8 6 7 6 7
+ LFP4_STOP_PST_VFF_EXT:9 9 0 1 0 1
+      LFP4_CTL_VFP_EXT:9 9 2 3 2 3
+          LFP4_CTL_VFP:9 9 4 5 4 5
+          LFP4_CTL_VBP:9 9 6 7 6 7
+ LFP5_STOP_PST_VFF_EXT:10 10 0 1 0 1
+      LFP5_CTL_VFP_EXT:10 10 2 3 2 3
+          LFP5_CTL_VFP:10 10 4 5 4 5
+          LFP5_CTL_VBP:10 10 6 7 6 7
+ LFP6_STOP_PST_VFF_EXT:11 11 0 1 0 1
+      LFP6_CTL_VFP_EXT:11 11 2 3 2 3
+          LFP6_CTL_VFP:11 11 4 5 4 5
+          LFP6_CTL_VBP:11 11 6 7 6 7
+ LFP7_STOP_PST_VFF_EXT:12 12 0 1 0 1
+      LFP7_CTL_VFP_EXT:12 12 2 3 2 3
+          LFP7_CTL_VFP:12 12 4 5 4 5
+          LFP7_CTL_VBP:12 12 6 7 6 7
+ LFP8_STOP_PST_VFF_EXT:13 13 0 1 0 1
+      LFP8_CTL_VFP_EXT:13 13 2 3 2 3
+          LFP8_CTL_VFP:13 13 4 5 4 5
+          LFP8_CTL_VBP:13 13 6 7 6 7
+ LFP9_STOP_PST_VFF_EXT:14 14 0 1 0 1
+      LFP9_CTL_VFP_EXT:14 14 2 3 2 3
+          LFP9_CTL_VFP:14 14 4 5 4 5
+          LFP9_CTL_VBP:14 14 6 7 6 7
+LFP10_STOP_PST_VFF_EXT:15 15 0 1 0 1
+     LFP10_CTL_VFP_EXT:15 15 2 3 2 3
+         LFP10_CTL_VFP:15 15 4 5 4 5
+         LFP10_CTL_VBP:15 15 6 7 6 7
+LFP11_STOP_PST_VFF_EXT:16 16 0 1 0 1
+     LFP11_CTL_VFP_EXT:16 16 2 3 2 3
+         LFP11_CTL_VFP:16 16 4 5 4 5
+         LFP11_CTL_VBP:16 16 6 7 6 7
+LFP12_STOP_PST_VFF_EXT:17 17 0 1 0 1
+     LFP12_CTL_VFP_EXT:17 17 2 3 2 3
+         LFP12_CTL_VFP:17 17 4 5 4 5
+         LFP12_CTL_VBP:17 17 6 7 6 7
+LFP13_STOP_PST_VFF_EXT:18 18 0 1 0 1
+     LFP13_CTL_VFP_EXT:18 18 2 3 2 3
+         LFP13_CTL_VFP:18 18 4 5 4 5
+         LFP13_CTL_VBP:18 18 6 7 6 7
+LFP14_STOP_PST_VFF_EXT:19 19 0 1 0 1
+     LFP14_CTL_VFP_EXT:19 19 2 3 2 3
+         LFP14_CTL_VFP:19 19 4 5 4 5
+         LFP14_CTL_VBP:19 19 6 7 6 7
+LFP15_STOP_PST_VFF_EXT:20 20 0 1 0 1
+     LFP15_CTL_VFP_EXT:20 20 2 3 2 3
+         LFP15_CTL_VFP:20 20 4 5 4 5
+         LFP15_CTL_VBP:20 20 6 7 6 7
+LFP16_STOP_PST_VFF_EXT:21 21 0 1 0 1
+     LFP16_CTL_VFP_EXT:21 21 2 3 2 3
+         LFP16_CTL_VFP:21 21 4 5 4 5
+         LFP16_CTL_VBP:21 21 6 7 6 7
+LFP17_STOP_PST_VFF_EXT:22 22 0 1 0 1
+     LFP17_CTL_VFP_EXT:22 22 2 3 2 3
+         LFP17_CTL_VFP:22 22 4 5 4 5
+         LFP17_CTL_VBP:22 22 6 7 6 7
+LFP18_STOP_PST_VFF_EXT:23 23 0 1 0 1
+     LFP18_CTL_VFP_EXT:23 23 2 3 2 3
+         LFP18_CTL_VFP:23 23 4 5 4 5
+         LFP18_CTL_VBP:23 23 6 7 6 7
+     SEQP3_CTL_VFP_EXT:24 24 0 1 0 1
+     SEQP2_CTL_VFP_EXT:24 24 2 3 2 3
+     SEQP1_CTL_VFP_EXT:24 24 4 5 4 5
+       GSD_CTL_VFP_EXT:24 24 6 7 6 7
+        ISC_REF_BY_CMD:25 25 0 1 0 1
+         SC_REF_BY_DIM:25 25 3 3 3 3
+            SC_OFF_SEL:25 25 4 4 4 4
+           ISC_ON_LINK:25 25 7 7 7 7
+         ISC_FRAME_NUM:26 26 0 7 0 7
+     ISC_FRAME_NUM_REF:27 27 0 7 0 7
+           ISC_CTL_SSW:28 28 0 1 0 1
+             SC_CTL_TE:28 28 4 5 4 5
+           SC_CTL_STV4:29 29 0 1 0 1
+           SC_CTL_STV3:29 29 2 3 2 3
+           SC_CTL_STV2:29 29 4 5 4 5
+           SC_CTL_STV1:29 29 6 7 6 7
+           SC_CTL_CKV4:30 30 0 1 0 1
+           SC_CTL_CKV3:30 30 2 3 2 3
+           SC_CTL_CKV2:30 30 4 5 4 5
+           SC_CTL_CKV1:30 30 6 7 6 7
+           SC_CTL_LFP2:31 31 0 1 0 1
+           SC_CTL_LFP1:31 31 2 3 2 3
+            SC_CTL_GSD:31 31 4 5 4 5
+           SC_CTL_LFP6:31 31 0 1 0 1
+           SC_CTL_LFP5:31 31 2 3 2 3
+           SC_CTL_LFP4:31 31 4 5 4 5
+           SC_CTL_LFP3:31 31 6 7 6 7
+          SC_CTL_LFP10:32 32 0 1 0 1
+           SC_CTL_LFP9:32 32 2 3 2 3
+           SC_CTL_LFP8:32 32 4 5 4 5
+           SC_CTL_LFP7:32 32 6 7 6 7
+          SC_CTL_LFP14:33 33 0 1 0 1
+          SC_CTL_LFP13:33 33 2 3 2 3
+          SC_CTL_LFP12:33 33 4 5 4 5
+          SC_CTL_LFP11:33 33 6 7 6 7
+          SC_CTL_LFP18:34 34 0 1 0 1
+          SC_CTL_LFP17:34 34 2 3 2 3
+          SC_CTL_LFP16:34 34 4 5 4 5
+          SC_CTL_LFP15:34 34 6 7 6 7
 REG-0xC4:Source Timing setting
+              DIV:0 0 0 1 0 1
+          DIV_FR4:1 1 0 1 0 1
+          DIV_FR3:1 1 2 3 2 3
+          DIV_FR3:1 1 4 5 4 5
+          DIV_FR1:1 1 6 7 6 7
+     SOUT_GPCG_F2:2 2 0 7 0 7
+     SOUT_GPCG_R2:3 3 0 7 0 7
+     SOUT_PPCG_R1:4 4 0 7 0 7
+     SOUT_GPCG_F1:5 5 0 7 0 7
+     SOUT_GPCG_R1:6 6 0 7 0 7
+     SOUT_PPCG_R3:7 7 0 7 0 7
+     SOUT_GPCG_F3:8 8 0 7 0 7
+     SOUT_GPCG_R3:9 9 0 7 0 7
+          SO_SNT0:14 15 0 3 0 7              
+          SO_SNT2:16 17 0 3 0 7
+          SO_SNT3:18 19 0 3 0 7
+      SO_SNT2_HIZ:20 21 0 3 0 7
+      SO_SNT3_HIZ:22 23 0 3 0 7
+           SC_EVT:26 26 0 7 0 7
+           SC_HOW:27 27 0 7 0 7
+           SC_END:28 28 0 7 0 7
+  SC_INS_NUM_EVT1:29 29 0 3 0 3
+  SC_INS_NUM_EVT0:29 29 4 7 4 7
+  SC_INS_NUM_EVT3:30 30 0 3 0 3
+  SC_INS_NUM_EVT2:30 30 4 7 4 7
+  SC_INS_NUM_EVT5:31 31 0 3 0 3
+  SC_INS_NUM_EVT4:31 31 4 7 4 7
+  SC_INS_NUM_EVT7:32 32 0 3 0 3
+  SC_INS_NUM_EVT6:32 32 4 7 4 7
+SC_VFP_KEEP_DELAY:33 33 0 7 0 7
+ BK_DISP_KEEP_END:34 34 0 0 0 0
+  BK_DISP_KEEP_EN:34 34 4 4 4 4
+      SOUT_PCG_EN:37 42 0 7 0 7
+   SOUT_PCG_RF_SW:43 48 0 7 0 7
+
 REG-0xC5:Gamma setting
+   GAMADJ:0 0 0 0 0 0
+FG_FRC_ON:0 0 3 3 3 3
 REG-0xCD:color enhancement
+          CSM_ON:0 0 0 0 0 0
+            W_X4:1 1 0 0 0 0
+            W_X2:1 1 1 1 1 1
+       W_POINT_R:2  2 0 7 0 7
+       W_POINT_G:3  3 0 7 0 7
+       W_POINT_B:4  4 0 7 0 7
+       R_POINT_R:5  5  0 7 0 7
+       R_POINT_G:6  6  0 7 0 7
+       R_POINT_B:7  7  0 7 0 7
+       G_POINT_R:8  8  0 7 0 7
+       G_POINT_G:9  9  0 7 0 7
+       G_POINT_B:10 10 0 7 0 7
+       B_POINT_R:11 11 0 7 0 7
+       B_POINT_G:12 12 0 7 0 7
+       B_POINT_B:13 13 0 7 0 7
+       C_POINT_R:14 14 0 7 0 7
+       C_POINT_G:15 15 0 7 0 7
+       C_POINT_B:16 16 0 7 0 7
+       M_POINT_R:17 17 0 7 0 7
+       M_POINT_G:18 18 0 7 0 7
+       M_POINT_B:19 19 0 7 0 7
+       Y_POINT_R:20 20 0 7 0 7
+       Y_POINT_G:21 21 0 7 0 7
+       Y_POINT_B:22 22 0 7 0 7
+SEL_COLOR0_BEF_R:23 23 0 7 0 7
+SEL_COLOR0_BEF_G:24 24 0 7 0 7
+SEL_COLOR0_BEF_B:25 25 0 7 0 7
+SEL_COLOR0_AFT_R:26 26 0 7 0 7
+SEL_COLOR0_AFT_G:27 27 0 7 0 7
+SEL_COLOR0_AFT_B:28 28 0 7 0 7
+ SEL_COLOR0_AREA:29 29 0 7 0 7
+SEL_COLOR1_BEF_R:30 30 0 7 0 7
+SEL_COLOR1_BEF_G:31 31 0 7 0 7
+SEL_COLOR1_BEF_B:32 32 0 7 0 7
+SEL_COLOR1_AFT_R:33 33 0 7 0 7
+SEL_COLOR1_AFT_G:34 34 0 7 0 7
+SEL_COLOR1_AFT_B:35 35 0 7 0 7
+ SEL_COLOR1_AREA:36 36 0 7 0 7
+SEL_COLOR2_BEF_R:37 37 0 7 0 7
+SEL_COLOR2_BEF_G:38 38 0 7 0 7
+SEL_COLOR2_BEF_B:39 39 0 7 0 7
+SEL_COLOR2_AFT_R:40 40 0 7 0 7
+SEL_COLOR2_AFT_G:41 41 0 7 0 7
+SEL_COLOR2_AFT_B:42 42 0 7 0 7
+ SEL_COLOR2_AREA:43 43 0 7 0 7
+SEL_COLOR3_BEF_R:44 44 0 7 0 7
+SEL_COLOR3_BEF_G:45 45 0 7 0 7
+SEL_COLOR3_BEF_B:46 46 0 7 0 7
+SEL_COLOR3_AFT_R:47 47 0 7 0 7
+SEL_COLOR3_AFT_G:48 48 0 7 0 7
+SEL_COLOR3_AFT_B:49 49 0 7 0 7
+ SEL_COLOR3_AREA:50 50 0 7 0 7
+SEL_COLOR4_BEF_R:51 51 0 7 0 7
+SEL_COLOR4_BEF_G:52 52 0 7 0 7
+SEL_COLOR4_BEF_B:53 53 0 7 0 7
+SEL_COLOR4_AFT_R:54 54 0 7 0 7
+SEL_COLOR4_AFT_G:55 55 0 7 0 7
+SEL_COLOR4_AFT_B:56 56 0 7 0 7
+ SEL_COLOR4_AREA:57 57 0 7 0 7
+SEL_COLOR5_BEF_R:58 58 0 7 0 7
+SEL_COLOR5_BEF_G:59 59 0 7 0 7
+SEL_COLOR5_BEF_B:60 60 0 7 0 7
+SEL_COLOR5_AFT_R:61 61 0 7 0 7
+SEL_COLOR5_AFT_G:62 62 0 7 0 7
+SEL_COLOR5_AFT_B:63 63 0 7 0 7
+ SEL_COLOR5_AREA:64 64 0 7 0 7
 REG-0xD0:Power setting(for CHGP)
+DC2:0 0 0 2 0 2
+DC3:0 0 4 6 4 6
+DC2_IDLE:1 1 0 2 0 2
+DC3_IDLE:1 1 4 6 4 6
+BT2:2 2 0 1 0 1
+BT3:2 2 4 5 4 5
+VLM21:3 3 0 6 0 6
+VLM33:5 5 0 6 0 6
+VC2:9 9 0 4 0 4
+VC3:10 10 0 4 0 4
+
 REG-0xD1:Power setting for External Power
+
 REG-0xD2:Test Register
 REG-0xD3:Power setting for internal Power
 REG-0xD4:Panel synchronous output-1
