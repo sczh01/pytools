@@ -56,6 +56,18 @@ def sync_dir(src_dir, dst_dir, is_recursion=True, ignores=[]):
 				#print ("copy"+ src_path.decode('utf-8')+ dst_path.decode('utf-8'))
 					print (src_path+" "+dst_path)
 					shutil.copy(src_path, dst_path)
+				else:
+					fp_src=open(src_path,'rb')
+					fp_src.seek(0,2)
+					src_file_size=fp_src.tell()
+					fp_dst=open(dst_path,'rb')
+					fp_dst.seek(0,2)
+					dst_file_size=fp_dst.tell()
+					if dst_file_size != src_file_size:
+						print (src_path+" replace: "+dst_path)
+						shutil.copy(src_path, dst_path)		
+					fp_src.close()
+					fp_dst.close()				
 
 			except IOError:
         			print ("error:"+src_path)
@@ -65,7 +77,7 @@ def sync_dir(src_dir, dst_dir, is_recursion=True, ignores=[]):
 
 def sync_tree(src_dir, dst_dir, level=1, ignores=[]):
 	files = os.listdir(src_dir)
-	for f in files:
+	for f in files:                         
 		if f in ignores: continue
 		src_path = os.path.join(src_dir, f)
 		dst_path = os.path.join(dst_dir, f)
@@ -111,7 +123,7 @@ def _zip(src_dir, zip_file, is_recursion, ignores, root_path):
 			print("zip "+ " " +src_path+ zip_path)
 			zip_file.write(src_path, zip_path)
 
-def main(src,dist,is_sub="True",ignores="svn,Thumbs.db",iszip="False",level=2):
+def main(src,dist,is_sub="True",iszip="False",ignores="svn,Thumbs.db",level=2):
 	print( "run -------------------")
 
 	ign_dir=[]
@@ -129,7 +141,8 @@ def main(src,dist,is_sub="True",ignores="svn,Thumbs.db",iszip="False",level=2):
 	#os.system("cp %s %s"%("./a/*.xlsx",dist))
 
 	if iszip == "T":
-		zip_dir(src,dist+".zip",is_sub,ign_dir)
+	#	zip_dir(src,dist+".zip",is_sub,ign_dir)
+		shutil.make_archive(dist+".zip",'zip',root_dir=src)
 	
 	print ("over ------------------")
 

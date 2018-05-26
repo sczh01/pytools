@@ -446,9 +446,9 @@ def Elecs_to( filename, out_type='' ):
     return "success"
 
 def usage_E7422_to_BOE():
-    print("\nError, no input file.\nUsage: syna2boe.exe filename\n")
+    print("\nError, no input file.\nUsage: syna2cus.exe filename\n")
 
-def E7422_to_BOE( filename="" ):
+def E7422_to_BOE( filename="", mode="BOE_W7", cmd_head="REGS.WRITE" ):
     if filename == '':
         usage_E7422_to_BOE()
         return "Fail"
@@ -489,11 +489,17 @@ def E7422_to_BOE( filename="" ):
             #Generic_Long_Write_FIFO(4,B3);//0xB3
             line_mipi_type,line_mipi_data = line_use[:len(line_data[0])],line_use[len(line_data[0])+1:] #[int(i) for i in lines.split()]
             tmp_str=re.compile(' ')
-            line_mipi_data_sub=tmp_str.sub(',',line_use)
+            line_elecs_data_sub=tmp_str.sub(',',line_use)
+            tmp_str=re.compile(' ')
+            line_mipi_data_sub=tmp_str.sub(',',line_mipi_data)
 
             if line_mipi_type == "0x29" or line_mipi_type == "0x39" or line_mipi_type == "0x15" or line_mipi_type == "0x05":
                 cmd_7422.append(line_mipi_data)
-                line_mipi_data_gx_str='REGS.WRITE(0,'+line_mipi_data_sub+')\n'
+                if mode == "BOE_W7":
+                    line_mipi_data_gx_str=cmd_head+'(0,'+line_elecs_data_sub+')\n'
+                elif mode == "SYNA_FHD":
+                    line_mipi_data_gx_str=cmd_head+'('+line_mipi_data_sub+');\n'
+
                 #line_mipi_data_gx_cmd_str="Generic_Long_Write_FIFO("+str(len(line_data)-1)+','+line_data[1][2:]+');\n'
                 cmd_gx_str.append(line_mipi_data_gx_str)   
                 #cmd_gx_cmd.append(line_mipi_data_gx_cmd_str)
@@ -501,7 +507,7 @@ def E7422_to_BOE( filename="" ):
         # Efield.append(E_tmp)
         pass
     file_to_read.close()
-    with open(filename.split('.txt')[0]+"_Syna2BOE.txt","w") as file_to_write:
+    with open(filename.split('.txt')[0]+"_Syna2"+mode+".txt","w") as file_to_write:
         file_to_write.writelines(cmd_gx_str) 
         #file_to_write.writelines(cmd_gx_cmd)
     file_to_write.close()
@@ -565,15 +571,19 @@ def E7422_to_gx( filename, reg_name,device="66451" ):
                 if line_data[1] =="0xC6":
                     if device == "66451":
                         reg_process_0xCX(filename.split('.txt')[0]+'-'+line_data[1]+'-'+str(GM_66451_Count[line_data[1]]),line_data)
+                        GM_66451_Count[line_data[1]] +=1
                 if line_data[1] =="0xC7":
                     if device == "66451":
                         reg_process_0xCX(filename.split('.txt')[0]+'-'+line_data[1]+'-'+str(GM_66451_Count[line_data[1]]),line_data)
+                        GM_66451_Count[line_data[1]] +=1
                 if line_data[1] =="0xC8":
                     if device == "66451":
                         reg_process_0xCX(filename.split('.txt')[0]+'-'+line_data[1]+'-'+str(GM_66451_Count[line_data[1]]),line_data)
+                        GM_66451_Count[line_data[1]] +=1
                 if line_data[1] =="0xC9":
                     if device == "66451":
                         reg_process_0xCX(filename.split('.txt')[0]+'-'+line_data[1]+'-'+str(GM_66451_Count[line_data[1]]),line_data)
+                        GM_66451_Count[line_data[1]] +=1
                 if line_data[1] =="0xCA":
                     if device == "66451":
                         reg_process_0xCX(filename.split('.txt')[0]+'-'+line_data[1]+'-'+str(GM_66451_Count[line_data[1]]),line_data)
@@ -581,6 +591,7 @@ def E7422_to_gx( filename, reg_name,device="66451" ):
                 if line_data[1] =="0xCB":
                     if device == "66451":
                         reg_process_0xCX(filename.split('.txt')[0]+'-'+line_data[1]+'-'+str(GM_66451_Count[line_data[1]]),line_data)
+                        GM_66451_Count[line_data[1]] +=1
                 continue
         pass
     file_to_read.close()
@@ -1667,16 +1678,16 @@ if __name__ == '__main__':
     #factory_test()
     
     #compare the some register
-    reg_data=E7422_to_gx(sys.argv[1], ["0xCF","0xD7"])
+    #reg_data=E7422_to_gx(sys.argv[1], ["0xCF","0xD7"])
 
     #r66451=reg_file("R66451","./reg_map_R66451.txt")
     #r66451.read_reg_struc_file("./reg_map_R66451.txt")
-    '''for convert Elecs to BOE
+    #'''for convert Elecs to BOE
     if len(sys.argv)!=1:
-        E7422_to_BOE(sys.argv[1])
+        E7422_to_BOE(sys.argv[1],sys.argv[2],sys.argv[3])
     else:
         usage_E7422_to_BOE()
-    '''
+    #'''
     #reg_process_0xCF(reg_data)
     #reg_data=E7422_to_gx(sys.argv[1], "0xD7")
     #reg_process_0xD7(reg_data)

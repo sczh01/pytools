@@ -35,10 +35,10 @@
         "cwd": "${workspaceFolder}",
         "env": {},
         "args": [
-            "./AOD_ON_0504.txt",
-            "D:/tony/doc/003_AMOLED/R66451/6.4/gamma issue/convert.txt",
-            "./src/6.39 R66451_B7_Command_non compression_20180328_1pulse_12H+IP_E7402.txt",
-            "D:/tony/doc/003_AMOLED/R66451/6.18/SDD_cphy_code/6.18_no_com.txt"
+            "build",
+            "build_test",
+            "T",
+            "T"
         ],
         "envFile": "${workspaceFolder}/.env",
         "debugOptions": [
