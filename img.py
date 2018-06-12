@@ -40,7 +40,61 @@ class Graphics:
         y_s = x/w_divide_h  
         out = im.resize((x_s, y_s), Image.ANTIALIAS)   
         out.save(cls.outfile)  
-      
+
+    @classmethod  
+    def draw_scale(cls,outfile,infile,param=[[400,500,150,350,450],16,1440,3120],pic_data=(128,128,128),pic_mode='RGB',isFont=True,customer=[]):
+
+        w,h=param[2],param[3]
+
+        #build the draw list. Ex: 40*40/5 grayscle,and from 16 to 20, step is 4, 
+        #the coordinate of list is[[(0,0),(39,0),8,16],[(0,8),(39,8),8,20],[(0,16),(39,16),8,24],[(0,24),(39,24),8,28],[(0,32),(39,32),8,32]]
+        newIm = Image.new(pic_mode, (w, h), pic_data)  
+        drawIm=ImageDraw.Draw(newIm)
+        draw_list=[]
+        draw_line=[]
+        Scale_100=0
+        Scale_10=0
+        j=0
+
+        for i in range(99,w,100):
+            draw_line.append((i,param[0][2]+param[0][0]))
+            draw_line.append((i,param[0][1]+param[0][0]))
+            draw_list.append(draw_line)
+            draw_line=[]
+            j+=1
+        Scale_100=j
+
+        for i in range(9,w,10):
+            if i%100 == 0:
+                continue
+
+            draw_line.append((i,param[0][3]+param[0][0]))
+            draw_line.append((i,param[0][1]+param[0][0]))
+            draw_list.append(draw_line)
+            draw_line=[]
+            j+=1
+
+        Scale_10=j-Scale_100
+
+        for i in range(1,w,2):
+            draw_line.append((i,param[0][4]+param[0][0]))
+            draw_line.append((i,param[0][1]+param[0][0]))
+            draw_list.append(draw_line)
+            draw_line=[]
+            j+=1
+
+        for i in range(len(draw_list)):
+            drawIm.line((draw_list[i][0],draw_list[i][1]),fill=param[1])
+
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", param[1] )
+
+        for i in range(Scale_100):
+            drawIm.text((draw_list[i][0]),str(i+1),(255,0,0),font=ttFont)
+        for i in range(Scale_10):
+            drawIm.text((draw_list[i+Scale_100][0]),str(i%9+1),(255,0,0), font=ttFont)
+
+        newIm.save(outfile)
+              
     @classmethod  
     def draw_gradual(cls,outfile,param=[8,[256,1,0,255],0,1,1440,3120],pic_mode="RGB",pic_data=(0,0,0),isFont=True,customer=[]):
 
@@ -374,4 +428,5 @@ if __name__ == '__main__':
     #draw_pic(cls,filename, outfile,w,h,op_mode,sub_op_mode,param=[8,256,"RGB"],pic_mode="RGB",pic_data=(0,0,0)):
    
     #Graphics.draw_pic("","red.bmp",1440,3120,"grayscale","gradual",[8,[256,1,0,255],0,1])
-    Graphics.draw_gradual("red.bmp",[8,[256,4,32,128],0,1,1440,3120])
+    #Graphics.draw_gradual("red.bmp",[0,1,1440,3120])
+    Graphics.draw_scale("scale_1440.bmp","",[[400,500,150,350,450],20,1440,3120])

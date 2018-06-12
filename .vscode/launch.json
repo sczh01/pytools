@@ -5,13 +5,29 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Python: Anaconda Py27 Scrapy",
+            "type": "python",
+            "request": "launch",
+            "stopOnEntry": true,
+            "pythonPath": "D:\\tony\\tools\\anaconda3_51\\envs\\py2\\python.exe",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}\\engaca_spider",
+            "env": {},
+            "args": [
+            ],
+            "envFile": "${workspaceFolder}/.env",
+            "debugOptions": [
+                "RedirectOutput"
+            ]
+        },
+        {
             "name": "Python: Anaconda Py27",
             "type": "python",
             "request": "launch",
             "stopOnEntry": true,
             "pythonPath": "D:\\tony\\tools\\anaconda3_51\\envs\\py2\\python.exe",
             "program": "${file}",
-            "cwd": "${workspaceFolder}",
+            "cwd": "${workspaceFolder}\\engaca_spider",
             "env": {},
             "args": [
                 "D:/tony/doc/003_AMOLED/R66451/6.4/gamma issue/convert.txt",
