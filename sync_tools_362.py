@@ -1,5 +1,5 @@
 #-*- coding: UTF-8 -*-
-import os, sys, time,shutil,zipfile
+import os, sys, time,shutil,zipfile, datetime
 
 #reload(sys)
 #sys.setdefaultencoding('utf8')
@@ -17,8 +17,16 @@ def copy_file(src,tg):
 # dst_dir 目标目录
 # is_recursion 是否递归
 # ignores 忽略文件名列表
-def sync_dir(src_dir, dst_dir, is_recursion=True, ignores=[]):
-	files = os.listdir(src_dir)
+def sync_dir(src_dir, dst_dir, is_recursion=True, ignores=[], process_exist_dir="F"):
+	#test
+	
+	#end
+	try:
+		files = os.listdir(src_dir)
+	except IOError:
+		print("error:"+src_dir)
+		return
+
 	for f in files:
 
 		# 忽略列表
@@ -41,14 +49,16 @@ def sync_dir(src_dir, dst_dir, is_recursion=True, ignores=[]):
 			try:
 				if not os.path.exists(dst_path): 
 					os.makedirs(dst_path) 
-					print("mkdir"+ dst_path)
-
+					print("mkdir "+ dst_path)
+				elif process_exist_dir=="F":
+					print("MSG: Exist this DIR("+ dst_path+") Continue!")
+					continue
 				#os.mkdir(dst_path)
 				#print("mkdir"+ dst_path)
 			except:
 				pass
 
-			sync_dir(src_path, dst_path, is_recursion, ignores)
+			sync_dir(src_path, dst_path, is_recursion, ignores,"T")
 
 		else:
 			try:			
@@ -57,6 +67,7 @@ def sync_dir(src_dir, dst_dir, is_recursion=True, ignores=[]):
 					print (src_path+" "+dst_path)
 					shutil.copy(src_path, dst_path)
 				else:
+					'''
 					fp_src=open(src_path,'rb')
 					fp_src.seek(0,2)
 					src_file_size=fp_src.tell()
@@ -68,7 +79,16 @@ def sync_dir(src_dir, dst_dir, is_recursion=True, ignores=[]):
 						shutil.copy(src_path, dst_path)		
 					fp_src.close()
 					fp_dst.close()				
-
+					'''
+					timestamp_src = os.path.getmtime(src_path)
+					timestamp_dst = os.path.getmtime(dst_path)
+					date_src = datetime.datetime.fromtimestamp(timestamp_src)
+					date_dst = datetime.datetime.fromtimestamp(timestamp_dst)
+					if date_dst == date_src:
+						continue
+					else:
+						print (src_path+" replace: "+dst_path)
+						shutil.copy(src_path, dst_path)							
 			except IOError:
         			print ("error:"+src_path)
 				#new_src_path = "'"+src_path+"'"
@@ -123,7 +143,7 @@ def _zip(src_dir, zip_file, is_recursion, ignores, root_path):
 			print("zip "+ " " +src_path+ zip_path)
 			zip_file.write(src_path, zip_path)
 
-def main(src,dist,is_sub="True",iszip="False",ignores="svn,Thumbs.db",level=2):
+def main(src,dist,is_sub="True",iszip="False",process_exist_dir="F",ignores="svn,Thumbs.db",level=2 ):
 	print( "run -------------------")
 
 	ign_dir=[]
@@ -131,9 +151,9 @@ def main(src,dist,is_sub="True",iszip="False",ignores="svn,Thumbs.db",level=2):
 		ign_dir.append(str)
 
 	if is_sub=="T":
-		sync_dir(src,dist,True,ign_dir)
+		sync_dir(src,dist,True,ign_dir,process_exist_dir)
 	elif is_sub=="F":
-		sync_dir(src,dist,False,ign_dir)
+		sync_dir(src,dist,False,ign_dir,process_exist_dir)
 	elif is_sub=="tree":
 		sync_tree(src,dist,int(level),ignores)
 
@@ -148,11 +168,11 @@ def main(src,dist,is_sub="True",iszip="False",ignores="svn,Thumbs.db",level=2):
 
 if __name__ == '__main__':
 	argv_num=len(sys.argv)
-	if argv_num == 3:
-		main(sys.argv[1],sys.argv[2])
-	elif argv_num == 4:
+	if argv_num == 4:
 		main(sys.argv[1],sys.argv[2],sys.argv[3])
 	elif argv_num == 5:
 		main(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4])
+	elif argv_num == 6:
+		main(sys.argv[1],sys.argv[2],sys.argv[3],sys.argv[4],sys.argv[5])
 	else:
 		print("Import parameter is error!")

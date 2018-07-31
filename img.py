@@ -42,7 +42,7 @@ class Graphics:
         out.save(cls.outfile)  
 
     @classmethod  
-    def draw_scale(cls,outfile,infile,param=[[400,500,150,350,450],16,1440,3120],pic_data=(128,128,128),pic_mode='RGB',isFont=True,customer=[]):
+    def draw_scale(cls,outfile,infile,param=[[400,500,150,350,450,[[225,48]]],16,1440,3120],pic_data=(128,128,128),pic_mode='RGB',isFont=True,customer=[]):
 
         w,h=param[2],param[3]
 
@@ -65,7 +65,7 @@ class Graphics:
         Scale_100=j
 
         for i in range(9,w,10):
-            if i%100 == 0:
+            if (i+1)% 100== 0:
                 continue
 
             draw_line.append((i,param[0][3]+param[0][0]))
@@ -77,24 +77,96 @@ class Graphics:
         Scale_10=j-Scale_100
 
         for i in range(1,w,2):
-            draw_line.append((i,param[0][4]+param[0][0]))
-            draw_line.append((i,param[0][1]+param[0][0]))
+            draw_line.append((i,param[0][4]-((i-1)%10)*30+param[0][0]))
+            draw_line.append((i,param[0][1]-((i-1)%10)*30+param[0][0]))
             draw_list.append(draw_line)
             draw_line=[]
             j+=1
 
+
         for i in range(len(draw_list)):
             drawIm.line((draw_list[i][0],draw_list[i][1]),fill=param[1])
 
-        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", param[1] )
+        for j in range(len(param[0][5])):
+            drawIm.line(((param[0][5][j][0],0),(param[0][5][j][0],h-1)),fill=(param[0][5][j][1],param[0][5][j][1],param[0][5][j][1]))
 
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", param[1]+param[1]/2 )
         for i in range(Scale_100):
             drawIm.text((draw_list[i][0]),str(i+1),(255,0,0),font=ttFont)
+
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", param[1]-param[1]/4 )
         for i in range(Scale_10):
             drawIm.text((draw_list[i+Scale_100][0]),str(i%9+1),(255,0,0), font=ttFont)
 
         newIm.save(outfile)
               
+    @classmethod
+    def img_file_join(cls, path, unit_size, unit_num, w, h):
+
+        images = [] # 先存储所有的图像的名称
+        for root, dirs, files in os.walk(path):     
+            for f in files :
+                images.append(f)
+        total_unit=len(images)/int(unit_num)
+
+        if not os.path.exists(path+'/result/'): 
+            os.makedirs(path+'/result/') 
+
+        for i in range(int(total_unit)): # unit_num 个图像为一组
+            imagefile = []
+            j = 0
+
+            for j in range(unit_num):
+                imagefile.append(Image.open(path+'/'+images[i*unit_num+j])) 
+            target = Image.new('RGB', (w, h))    
+            left = 0
+            right = unit_size
+
+            for image in imagefile:     
+                target.paste(image, (left, 0, right, h))# 将image复制到target的指定位置中
+                left += unit_size # left是左上角的横坐标，依次递增
+                right += unit_size # right是右下的横坐标，依次递增
+            quality_value = 100 # quality来指定生成图片的质量，范围是0～100
+
+            target.save(path+'/result/'+os.path.splitext(images[i*unit_size+j])[0]+'.bmp', quality = quality_value)
+            imagefile = []      
+
+    @classmethod  
+    def splitimage(cls, src, rownum, colnum, limit_w=0,limit_h=0,dstpath=""):
+        img = Image.open(src)
+        w, h = img.size
+
+        if (limit_h!=0 and rownum*limit_h != h) or (limit_w!=0 and colnum*limit_w !=w):
+            print('Original image info: %sx%s, %s, %s' % (w, h, img.format, img.mode))
+            print('size is not match')
+            return False
+
+        if rownum <= h and colnum <= w:
+            print('Original image info: %sx%s, %s, %s' % (w, h, img.format, img.mode))
+            print('开始处理图片切割, 请稍候...')
+
+        s = os.path.split(src)
+        if dstpath == '':
+            dstpath = s[0]
+            fn = s[1].split('.')
+            basename = fn[0]
+            ext = fn[-1]
+
+            num = 0
+            rowheight = h // rownum
+            colwidth = w // colnum
+            for r in range(rownum):
+                for c in range(colnum):
+                    box = (c * colwidth, r * rowheight, (c + 1) * colwidth, (r + 1) * rowheight)
+                    img.crop(box).save(os.path.join(dstpath, basename + '_' + str(num) + '.' + ext), ext)
+                    num = num + 1
+
+            print('图片切割完毕，共生成 %s 张小图片。' % num)
+            return True
+        else:
+            print('不合法的行列切割参数！')
+            return False
+
     @classmethod  
     def draw_gradual(cls,outfile,param=[8,[256,1,0,255],0,1,1440,3120],pic_mode="RGB",pic_data=(0,0,0),isFont=True,customer=[]):
 
@@ -337,7 +409,7 @@ Please write PPS information to register.
         print('文件不存在')
         ks_temp.to_csv('./ks_accumulate.csv', mode='a', index=False)
 '''    
-def image_operation( inifile=''): 
+def image_operation( inifile='',bypass=''): 
     #从ini获取源文件夹及目标文件夹路径 
     CMD_num=0
     CMD_type_num=0
@@ -365,6 +437,11 @@ def image_operation( inifile=''):
     IMG_HEGHT=ReadIni(IniPath,PyName,"IMG_HEGHT")
     IMG_WIDTH=ReadIni(IniPath,PyName,"IMG_WIDTH")
     CONVERT_PARAM=ReadIni(IniPath,PyName,"CONVERT_PARAM")
+    IS_SPLIT=ReadIni(IniPath,PyName,"IS_SPLIT")
+    SPLIT_COL=ReadIni(IniPath,PyName,"SPLIT_COL")
+    SPLIT_ROW=ReadIni(IniPath,PyName,"SPLIT_ROW")
+    SPLIT_FILE_WITH=ReadIni(IniPath,PyName,"SPLIT_FILE_WITH")
+    SPLIT_FILE_HEIGHT=ReadIni(IniPath,PyName,"SPLIT_FILE_HEIGHT")
     #如果目的文件夹不存在，创建之 
     if not os.path.exists(DescPath): 
         os.makedirs(DescPath) 
@@ -373,8 +450,8 @@ def image_operation( inifile=''):
     FileListDSC=[]
     FileListMID=[]
     if op_type == "dir":  
-        for files in os.walk(SrcPath): 
-            for FileName in files[2]: 
+        for root, dirs, files in os.walk(SrcPath): 
+            for FileName in files: 
                 if FileName.split('.')[-1] == FILE_TYPE: 
                     fileout=FileName #DescPath+"\\"+
                     FileName = SrcPath+"\\"+FileName
@@ -385,22 +462,25 @@ def image_operation( inifile=''):
                     FileList.append(FileName) 
                     newfile=fileout.split("."+FILE_TYPE)[0]+SUFFIX
                     FileListDSC.append(DescPath+"/"+newfile.split("."+FILE_TYPE)[0]+"."+MID_FILE_FORMAT)
-
+            break
     elif op_type == "file":
         FileList.append(SrcPath)
 
-    with open(LIST_FILE,"w") as file_to_write:
+    with open(LIST_FILE,"w") as file_to_write: #write file list for dsc
         for file in FileListDSC:
             file_to_write.writelines(file) 
             file_to_write.writelines("\n")
     file_to_write.close()
 
-    for file in FileList:
-        newfile=file.split("."+FILE_TYPE)[0]+SUFFIX
-        FileListMID.append(newfile)
-        if os.path.exists(newfile):
-            continue
-        Graphics.resize_by_height(file,newfile, int(IMG_WIDTH),int(IMG_HEGHT))
+    for file in FileList: #
+        if bypass=='yes':
+            newfile=file.split("."+FILE_TYPE)[0]+SUFFIX
+            FileListMID.append(newfile)
+            if os.path.exists(newfile):
+                continue
+            Graphics.resize_by_height(file,newfile, int(IMG_WIDTH),int(IMG_HEGHT))
+        elif bypass=='no' or bypass=='':
+            FileListMID.append(file)
 
     for i in range(len(FileListMID)):
         file=FileListMID[i]
@@ -415,7 +495,7 @@ def image_operation( inifile=''):
         #print(sub.read())  
 
     #os.poepn(TOOL_DSC)
-    sub=subprocess.Popen(TOOL_DSC,shell=True,stdout=subprocess.PIPE,cwd=DescPath)
+    sub=subprocess.Popen(TOOL_DSC,shell=True,stdout=subprocess.PIPE,cwd=DSC_TOOL_Path)
     sub.wait()
 
     sub=subprocess.Popen("copy ./*.dsc " + DescPath,shell=True,stdout=subprocess.PIPE,cwd=DSC_TOOL_Path)
@@ -423,10 +503,32 @@ def image_operation( inifile=''):
 
     sub=subprocess.Popen(TOOL_PPS+" "+FileListDSC[0].split(".ppm")[0]+".dsc",shell=True,stdout=subprocess.PIPE,cwd=DescPath)
     sub.wait()
+
 if __name__ == '__main__':
-    #image_operation()
-    #draw_pic(cls,filename, outfile,w,h,op_mode,sub_op_mode,param=[8,256,"RGB"],pic_mode="RGB",pic_data=(0,0,0)):
-   
+    argv_num=len(sys.argv)
+
+    if argv_num == 2:
+        if sys.argv[1] == "DSC":
+            image_operation()
+        else:
+            print("Don't support this command!\n")  
+    elif argv_num >2:
+        if sys.argv[1] == "SPLIT":
+            #Graphics.splitimage("1.bmp",1,2,1080,2480)
+            Graphics.splitimage(sys.argv[2], int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]))
+        elif sys.argv[1] == "JOIN":
+            #Graphics.img_file_join("D:\\tony\\tools\\pytools\\syna\\DSC\\join", 1080,2,2160,2480 )
+            Graphics.img_file_join(sys.argv[2], int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]) )
+        elif sys.argv[1] == "JOIN":
+            #Graphics.img_file_join("D:\\tony\\tools\\pytools\\syna\\DSC\\join", 1080,2,2160,2480 )
+            Graphics.img_file_join(sys.argv[2], int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]) )
+        else:
+            print("Don't support this command!\n")  
+    else:
+        print("Import parameter is error!")    
+
+    #draw_pic(cls,filename, outfile,w,h,op_mode,sub_op_mode,param=[8,256,"RGB"],pic_mode="RGB",pic_data=(0,0,0)): 
     #Graphics.draw_pic("","red.bmp",1440,3120,"grayscale","gradual",[8,[256,1,0,255],0,1])
     #Graphics.draw_gradual("red.bmp",[0,1,1440,3120])
-    Graphics.draw_scale("scale_1440.bmp","",[[400,500,150,350,450],20,1440,3120])
+    #Graphics.draw_scale("scale_1440_3_darker_line_S-13-1.bmp","",[[1400,500,150,350,450,[[1305,128],[440,128],[1315,128],[450,128]]],20,1440,3120],(32,32,32))
+    #Graphics.draw_scale("scale_1440_normal_00.bmp","",[[1400,500,150,200,440,[]],20,1440,3120],(00,00,00))

@@ -405,19 +405,22 @@ def writeRowColToTxt(list_name,matrix,file_path,t1="", t2=""):
     except IOError:
         print("fail to open file")
 
-def write_limit_ToTxt(list_min,list_max,matrix,file_path):
+def write_limit_ToTxt(list_min,list_max,matrix,file_path,limit_percent,str_seperate=','):
     try:
         fp = open(file_path,"w")
         item_str=""
         list_str=[]
-        item_str="TX/RX:"
+        item_str='TX/RX:%d%%' % limit_percent
+
         for j in range(matrix[1]):
-            item_str+="\tR"+str(j)
+            item_str+="\t(min)R"+str(j)
+            item_str+="\t(max)R"+str(j)
         list_str.append(item_str+"\n")
         for i in range(matrix[0]):
             item_str="T"+str(i)+":"
             for j in range(matrix[1]):
-                item_str+="\t"+str(list_min[i][j])+','+str(list_max[i][j])
+                #item_str+="\t"+str(list_min[i][j])+','+str(list_max[i][j]) #'%.2f %%' % 99.97
+                item_str+="\t"+'%.2f' % list_min[i][j] + str_seperate + '%.2f' % list_max[i][j]
             list_str.append(item_str+"\n")
             
         fp.writelines(list_str)
@@ -618,7 +621,9 @@ def statis_raw_cap_type_limit( filename , test_name, limit=[[-40,40,0,0],[20,25,
     end_time_str=""
     all_lines = []    
     all_good_frame_cnt=0
-
+    all_NG_frame_cnt=0
+    is_data_error = False
+    str_seperate=' '
     for filecnt in range(len(filename)):
         with open(filename[filecnt], 'r') as file_to_read:
             all_lines = file_to_read.readlines()
@@ -637,7 +642,7 @@ def statis_raw_cap_type_limit( filename , test_name, limit=[[-40,40,0,0],[20,25,
 
         start_pos = all_lines[start+tx_rx_log_info[1][0]].find("Pass")
         if start_pos != -1:   # good sample
-            start += tx_rx_log_info[1][2]
+            start += tx_rx_log_info[1][1]
             for j in range(start,start+tx_rx_log_info[0][0]):
                 line_data = all_lines[j].split(':')[1].split(",")
                 for k in range(tx_rx_log_info[0][1]):
@@ -646,14 +651,6 @@ def statis_raw_cap_type_limit( filename , test_name, limit=[[-40,40,0,0],[20,25,
 
                     ADC_int = float(ADC_str)
                     frame_data[j-start][k]+=ADC_int
-                    #if ADC_int < 0:
-                    #    if ADC_int < limit[0][0]*(1-limit[1][l]/100.0):
-                        #result_min_max_pos.append([i,ADC_int,j,k]) 
-                    #        frame_data_cnt[j-start][k]+=1
-
-                    #elif ADC_int > limit[0][1]*(1-limit[1][l]/100.0):
-                        #result_min_max_pos.append([i,ADC_int,j,k]) 
-                    #    frame_data_cnt[j-start][k]+=1
                 pass
             pass
             if tx_rx_log_info[0][2] == 1: #handle 0D area
@@ -663,15 +660,39 @@ def statis_raw_cap_type_limit( filename , test_name, limit=[[-40,40,0,0],[20,25,
                     ADC_str.strip()
                     ADC_int = float(ADC_str)
                     frame_data[j-start+1][k] += ADC_int
-            #all_frame_data.append(frame_data)
             all_good_frame_cnt+=1
-            #all_frame_min_max.append([Min_int,Max_int])
+        elif tx_rx_log_info[2][0] == 1: # caculate the NG sample
+            start += tx_rx_log_info[1][1]
+            for j in range(start,start+tx_rx_log_info[0][0]):
+                line_data = all_lines[j].split(':')[1].split(",")
+                for k in range(tx_rx_log_info[0][1]):
+                    ADC_str = line_data[k]
+                    ADC_str.strip()
 
+                    ADC_int = float(ADC_str)
+                    if ADC_int < 0:
+                        is_data_error=True
+                        break
+                    frame_data[j-start][k]+=ADC_int
+                pass
+                if is_data_error:
+                    break
             pass
-        else:
-            pass
-
+            if is_data_error:
+                is_data_error=False
+                continue
+            if tx_rx_log_info[0][2] == 1: #handle 0D area
+                line_data = all_lines[j+1].split(':')[1].split(",")
+                for k in range(tx_rx_log_info[0][3]):
+                    ADC_str = line_data[k]
+                    ADC_str.strip()
+                    ADC_int = float(ADC_str)
+                    frame_data[j-start+1][k] += ADC_int
+            all_NG_frame_cnt+=1            
     pass
+
+    if tx_rx_log_info[2][0] == 1: # caculate the NG sample
+        all_good_frame_cnt+=all_NG_frame_cnt
 
     for m in range(tx_rx_log_info[0][0]):
         for n in range(tx_rx_log_info[0][1]):  
@@ -681,19 +702,23 @@ def statis_raw_cap_type_limit( filename , test_name, limit=[[-40,40,0,0],[20,25,
         for n in range(tx_rx_log_info[0][3]):
             frame_data[tx_rx_log_info[0][0]][n]/=all_good_frame_cnt
 
+    if tx_rx_log_info[2][1] == 1: # output format for limit log
+        str_seperate='\t'
+    if tx_rx_log_info[2][1] == 2: # output format for limit log
+        str_seperate=','
+
     for l in range(len(limit[1])):
         for m in range(tx_rx_log_info[0][0]):
             for n in range(tx_rx_log_info[0][1]):  
                 limit_data_min[m][n]=frame_data[m][n]*(1-limit[1][l]/100.0)
                 limit_data_max[m][n]=frame_data[m][n]*(1+limit[1][l]/100.0)
-                #frame_data[m][m]=0       
+     
         if tx_rx_log_info[0][2] == 1: #handle 0D area
             for n in range(tx_rx_log_info[0][3]):  
                 limit_data_min[tx_rx_log_info[0][0]][n]=frame_data[tx_rx_log_info[0][0]][n]*(1-limit[1][l]/100.0)
                 limit_data_max[tx_rx_log_info[0][0]][n]=frame_data[tx_rx_log_info[0][0]][n]*(1+limit[1][l]/100.0)
         
-        #writeToTxt(all_frame_data,limit[1],filename+str(limit[1][l])+"%_raw_image_limit.log")
-        write_limit_ToTxt(limit_data_min,limit_data_max,[tx_rx_log_info[0][0]+tx_rx_log_info[0][2],tx_rx_log_info[0][1]], test_name+'-'+str(limit[1][l])+"%_raw_image_limit.log")
+        write_limit_ToTxt(limit_data_min,limit_data_max,[tx_rx_log_info[0][0]+tx_rx_log_info[0][2],tx_rx_log_info[0][1]], test_name+'-'+str(limit[1][l])+"%_raw_image_limit.log",limit[1][l],str_seperate)
         pass
     return "success"
 
@@ -1007,9 +1032,13 @@ def factory_test( inifile=''):
             limit = [[int(cmd_line[16]),int(cmd_line[17])],[int(param_line[i]) for i in range(len(param_line))]]
             tx_rx_log_struct = [[int(cmd_line[i]) for i in range(1,5)],[int(cmd_line[i]) for i in range(5,10)]]
             statis_raw_cap_type_limit(FileList,CMD_type[4],limit, tx_rx_log_struct)
+        if cmd_line[0] == '03':
+            limit = [[int(cmd_line[16]),int(cmd_line[17])],[int(param_line[i]) for i in range(len(param_line))]]
+            tx_rx_log_struct = [[int(cmd_line[i]) for i in range(1,5)],[int(cmd_line[i]) for i in range(5,10)],[int(cmd_line[18]),int(cmd_line[19])]]
+            statis_raw_cap_type_limit(FileList,CMD_type[3],limit, tx_rx_log_struct)
         if cmd_line[0] == '05':
             limit = [[int(cmd_line[16]),int(cmd_line[17])],[int(param_line[i]) for i in range(len(param_line))]]
-            tx_rx_log_struct = [[int(cmd_line[i]) for i in range(1,5)],[int(cmd_line[i]) for i in range(5,10)]]
+            tx_rx_log_struct = [[int(cmd_line[i]) for i in range(1,5)],[int(cmd_line[i]) for i in range(5,10)],[int(cmd_line[18]),int(cmd_line[19])]]
             statis_noise_type(FileList,CMD_type[5],limit,tx_rx_log_struct)
         if cmd_line[0] == '06':
             limit = [[int(cmd_line[16]),int(cmd_line[17])],[int(param_line[i]) for i in range(len(param_line))],[int(cmd_line[i]) for i in range(18,18+len(param_line))],[int(cmd_line[i]) for i in range(18+len(param_line),18+len(param_line)+2)]]

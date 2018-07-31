@@ -1,4 +1,0 @@
-
-[Example of converting bmp to ppm]
-
-bin\convert.exe -depth 8 from.bmp to.ppm

@@ -1,10 +1,11 @@
 # coding=utf-8
 import os,sys;
 import re
-import xlrd
+#import xlrd
 import os 
 import sys
 import ConfigParser 
+import struct
 
 cmd_7422 = []
 cmd_gx_str = []
@@ -27,44 +28,83 @@ class test_config(object):
         self.hobbies = ["table tenis"]
     pass
 
+def SV4E_Crack(filename):
+    cmd_num = 0
+    #for filename in filelist:
+    cmd_gx_str=[]
+    with open(filename, 'r') as file_to_read, open(filename+"_c.pyc","wb") as file_to_write :
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            #if IsPassLine( lines ) == False:
+                continue
+            if lines[0]=='/' and lines[1]=='/':
+                continue
+            line_pos = int(lines)
+            if line_pos==0:
+                continue
+
+            b=line_pos>>8
+            if b>255:
+                print "error:"
+            a = struct.pack('B',line_pos>>8)
+            file_to_write.write(a)
+            a = struct.pack('B',line_pos&0xff)
+            file_to_write.write(a)
+
+        pass
+
+    file_to_read.close()
+    file_to_write.close()
+
+
+    return "success"
+
 def BOE_to_other( filelist, file_our_src='',out_type=''):
     cmd_num = 0
-    for filename in filelist:
-        cmd_gx_str=[]
-        with open(filename, 'r') as file_to_read:
-            while True:
-                lines = file_to_read.readline() # 整行读取数据
-                if not lines:
-                    break
-                    pass
-                lines=lines.strip()
-                if lines =='':
-                    continue
-                if lines[0]=='#':
-                    continue
-                #if IsPassLine( lines ) == False:
-                    continue
-                if lines[0]=='/' and lines[1]=='/':
-                    continue
-                line_pos = lines.find("REGS.WRITE(0,")
+    #for filename in filelist:
+    cmd_gx_str=[]
+    with open(filelist, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            #if IsPassLine( lines ) == False:
+                continue
+            if lines[0]=='/' and lines[1]=='/':
+                continue
+            line_pos = lines.find("REGS.WRITE(0,")
 
-                if line_pos == -1:
-                    continue
-                line_use = lines[line_pos+13:]
-                line_pos = line_use.find(")")
-                line_use = line_use[:line_pos]
-                line_data=line_use.split(',')
-                line_use = line_use.replace(',',' ')
+            if line_pos == -1:
+                continue
+            line_use = lines[line_pos+13:]
+            line_pos = line_use.find(")")
+            line_use = line_use[:line_pos]
+            line_data=line_use.split(',')
+            line_use = line_use.replace(',',' ')
 
-                line_mipi_data_gx_str="mipi.write "+ line_use+'\n'
-                cmd_gx_str.append(line_mipi_data_gx_str)   
-                cmd_num +=1
-            pass
+            line_mipi_data_gx_str="mipi.write "+ line_use+'\n'
+            cmd_gx_str.append(line_mipi_data_gx_str)   
+            cmd_num +=1
+        pass
 
-        file_to_read.close()
-        with open(file_our_src+"/"+filename.split("/")[-1].split("txt")[-2]+"_Elecs.txt","w") as file_to_write:
-            file_to_write.writelines(cmd_gx_str) 
-        file_to_write.close()
+    file_to_read.close()
+    with open(filelist+"_Elecs.txt","w") as file_to_write:
+        file_to_write.writelines(cmd_gx_str) 
+    file_to_write.close()
 
 
     return "success"
@@ -448,6 +488,13 @@ def Elecs_to( filename, out_type='' ):
 def usage_E7422_to_BOE():
     print("\nError, no input file.\nUsage: syna2cus.exe filename\n")
 
+def usage_tools():
+    print("\nUsage reg_read.py cmd param_0 param_1 param_2 ...\ncmd: \
+    \nB_2_E boe_txt_file:BOE format to Elecs board. \
+    \nB3D TXT file:B3D read format to B3D board. \
+    \nE_2_B Elecs_txt_file:Elecs board to BOE. \
+    \nREG_A Elecs_txt_file:analzye the register setting.\n")
+
 def E7422_to_BOE( filename="", mode="BOE_W7", cmd_head="REGS.WRITE" ):
     if filename == '':
         usage_E7422_to_BOE()
@@ -513,6 +560,153 @@ def E7422_to_BOE( filename="", mode="BOE_W7", cmd_head="REGS.WRITE" ):
     file_to_write.close()
     return "success"
 
+def BOE_to_B3D( filename="", mode="GCS", cmd_head="REGS.WRITE" ):
+    if filename == '':
+        usage_E7422_to_BOE()
+        return "Fail"
+    line_mipi_data_gx_str = ""
+    with open(filename, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            line_pos = lines.find("#")
+            if line_pos != -1:
+                lines = lines[:line_pos]
+            
+            line_use=lines.strip()
+            line_data=lines.split()
+
+            '''
+            DF A0 00 93 93 93 FF FF FF FF
+            W_COM(0xBC);
+            W_DATA(0x79);
+            W_COM(0xBF);
+            W_DATA(0x93DF);
+            W_DATA(0x9393);
+            W_DATA(0xFFFF);
+            W_DATA(0xFFFF);
+            '''
+            #if line_data[0] >= "B0":
+            param_num=int(line_data[1],base=16)
+            param_num+=1
+            line_mipi_data_gx_str="W_COM(0xBC);\n"
+            line_mipi_data_gx_str+="W_DATA(0x"+hex(param_num)+");\n"
+            line_mipi_data_gx_str+="W_COM(0xBF);\n"
+            line_mipi_data_gx_str+="W_DATA(0x"+line_data[3]+line_data[0]+");\n"
+            for i in range(4, len(line_data)-1,2):
+                line_mipi_data_gx_str+="W_DATA(0x"+line_data[i+1]+line_data[i]+");\n"
+
+            if len(line_data)%2:
+                line_mipi_data_gx_str+="W_DATA(0x"+line_data[-1]+");\n"
+
+            line_mipi_data_gx_str+="\n"
+
+            #else:
+            #    pass#line_mipi_data_gx_str=cmd_head+'('+line_mipi_data_sub+');\n'
+
+            cmd_gx_str.append(line_mipi_data_gx_str)   
+
+        pass
+    file_to_read.close()
+    with open(filename.split('.txt')[0]+"_B3D"+".txt","w") as file_to_write:
+        file_to_write.writelines(cmd_gx_str) 
+
+    file_to_write.close()
+    return "success"
+
+def E7422_to_SV4E( filename="", mode="", cmd_head=["REGS.WRITE","dcsShortWrite","dcsLongWrite","genericLongWrite","REGS.WRITE"] ):
+    if filename == '':
+        usage_E7422_to_BOE()
+        return "Fail"
+    line_mipi_data_gx_str = ""
+    with open(filename, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            line_pos = lines.find("#")
+            if line_pos != -1:
+                lines = lines[:line_pos]
+            
+            line_pos = lines.find("mipi.write")
+            if line_pos != -1:
+                line_use = lines[len("mipi.write")+1:]
+            else :
+                line_pos = lines.find("delay")
+                if line_pos != -1 :
+                    if line_mipi_data_gx_str == "" or line_mipi_data_gx_str.find("REGS") == -1:
+                        continue
+
+                    line_mipi_data_gx_str='TIME.DELAY('+lines.split()[1]+')\n'
+                    cmd_gx_str.append(line_mipi_data_gx_str)   
+                    continue
+                else:
+                    continue
+
+            line_use=line_use.strip()
+            line_data=line_use.split()
+            #U16 B3[4]={0xB3,0x31,0x00,0x06};
+            #Generic_Long_Write_FIFO(4,B3);//0xB3
+            line_mipi_type,              line_mipi_cmd,line_mipi_data,                line_mipi_param = \
+            line_use[:len(line_data[0])],line_data[1], line_use[len(line_data[0])+1:],line_use[len(line_data[0])+len(line_data[1])+2:]
+            tmp_str=re.compile(' ')
+            line_elecs_data_sub=tmp_str.sub(',',line_use)
+            tmp_str=re.compile(' ')
+            line_mipi_data_sub=tmp_str.sub(',',line_mipi_data)
+            tmp_str=re.compile(' ')
+            line_mipi_param_sub=tmp_str.sub(',',line_mipi_param)
+
+            if line_mipi_type == "0x39" or line_mipi_type == "0x15" :
+                cmd_7422.append(line_mipi_data)
+                if mode == "BOE_W7":
+                    line_mipi_data_gx_str=cmd_head[0]+'(0,'+line_elecs_data_sub+')\n'
+                elif mode == "SYNA_FHD":
+                    line_mipi_data_gx_str=cmd_head[0]+'('+line_mipi_data_sub+');\n'
+                elif mode == "SV4E":
+                    line_mipi_data_gx_str=cmd_head[2]+'('+line_mipi_cmd+',['+line_mipi_param_sub+']);\n'               
+                cmd_gx_str.append(line_mipi_data_gx_str)   
+
+            if line_mipi_type == "0x29" or line_mipi_type == "0x23":
+                cmd_7422.append(line_mipi_data)
+                if mode == "BOE_W7":
+                    line_mipi_data_gx_str=cmd_head[0]+'(0,'+line_elecs_data_sub+')\n'
+                elif mode == "SYNA_FHD":
+                    line_mipi_data_gx_str=cmd_head[0]+'('+line_mipi_data_sub+');\n'
+                elif mode == "SV4E":
+                    line_mipi_data_gx_str=cmd_head[3]+'(['+line_mipi_data_sub+']);\n'               
+                cmd_gx_str.append(line_mipi_data_gx_str)   
+    
+            if line_mipi_type == "0x05":
+                cmd_7422.append(line_mipi_data)
+                if mode == "BOE_W7":
+                    line_mipi_data_gx_str=cmd_head[0]+'(0,'+line_elecs_data_sub+')\n'
+                elif mode == "SYNA_FHD":
+                    line_mipi_data_gx_str=cmd_head[0]+'('+line_mipi_data_sub+');\n'
+                elif mode == "SV4E":
+                    line_mipi_data_gx_str=cmd_head[1]+'('+line_mipi_cmd+');\n'  
+                cmd_gx_str.append(line_mipi_data_gx_str)   
+        
+        pass
+    file_to_read.close()
+    with open(filename.split('.txt')[0]+"_Syna2"+mode+".txt","w") as file_to_write:
+        file_to_write.writelines(cmd_gx_str) 
+        #file_to_write.writelines(cmd_gx_cmd)
+    file_to_write.close()
+    return "success"
+
 def E7422_to_gx( filename, reg_name,device="66451" ):
     with open(filename, 'r') as file_to_read:
         CF_Count =0
@@ -557,7 +751,7 @@ def E7422_to_gx( filename, reg_name,device="66451" ):
             tmp_str=re.compile(' ')
             line_mipi_data_sub=tmp_str.sub(',',line_mipi_data)
 
-            if line_mipi_type == "0x29":
+            if line_mipi_type == "0x29" or line_mipi_type == "0x39":
 
                 #for reg_name_str in reg_name:
                 #    if line_data[1] == reg_name_str:
@@ -1674,20 +1868,57 @@ if __name__ == '__main__':
     #p1,p2=get_src_file()
     #Compare_E7422( p1, p2 )
     #BOE_to_other(p1,p2)
+    
     #reg_analyze()
     #factory_test()
-    
+    #'''for convert Elecs to BOE
+    usage_tools()
+    argv = len(sys.argv)
+    if argv!=1:
+        if sys.argv[1] == "B_2_E":
+            BOE_to_other(sys.argv[2])
+        if sys.argv[1] == "B3D":
+            BOE_to_B3D(sys.argv[2])
+        elif sys.argv[1] == "E_2_B":
+            if argv == 5:
+                E7422_to_BOE(sys.argv[2],sys.argv[3],sys.argv[4])
+            elif argv == 4:
+                E7422_to_BOE(sys.argv[2],sys.argv[3])
+            elif argv == 3:
+                E7422_to_BOE(sys.argv[2])
+        elif sys.argv[1] == "E_2_SV4E":
+            if argv == 3:
+                E7422_to_SV4E(sys.argv[2])  
+
+            if argv == 4:
+                E7422_to_SV4E(sys.argv[2],sys.argv[3])             
+        elif sys.argv[1] == "REG_A":
+            E7422_to_gx(sys.argv[2], ["0xCF","0xD7"])
+        elif sys.argv[1] =="C_SV4E":
+            SV4E_Crack(sys.argv[2])
+        else:
+            print("Error: no any command!")
+    else:
+        usage_E7422_to_BOE()
+    #'''
     #compare the some register
     #reg_data=E7422_to_gx(sys.argv[1], ["0xCF","0xD7"])
 
     #r66451=reg_file("R66451","./reg_map_R66451.txt")
     #r66451.read_reg_struc_file("./reg_map_R66451.txt")
-    #'''for convert Elecs to BOE
+    '''for convert Elecs to BOE
     if len(sys.argv)!=1:
-        E7422_to_BOE(sys.argv[1],sys.argv[2],sys.argv[3])
+        BOE_to_other(sys.argv[1])
+        if len(sys.argv)==2:
+            pass
+        #    BOE_to_other(sys.argv[1])
+        elif len(sys.argv)==3:
+            pass
+            #BOE_to_other(sys.argv[1],sys.argv[2])
+    #    E7422_to_BOE(sys.argv[1],sys.argv[2],sys.argv[3])
     else:
         usage_E7422_to_BOE()
-    #'''
+    '''
     #reg_process_0xCF(reg_data)
     #reg_data=E7422_to_gx(sys.argv[1], "0xD7")
     #reg_process_0xD7(reg_data)

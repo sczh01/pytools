@@ -1,4 +1,2 @@
-D:/tony/tools/pytools/syna/dscv2/DSC/125144743_1440_2992.ppm
-D:/tony/tools/pytools/syna/dscv2/DSC/125930720_1440_2992.ppm
-D:/tony/tools/pytools/syna/dscv2/DSC/color_1440_2992.ppm
-D:/tony/tools/pytools/syna/dscv2/DSC/flight_1440_2992.ppm
+D:/tony/tools/pytools/syna/dscv2/DSC/Scale.ppm
+

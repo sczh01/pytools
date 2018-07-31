@@ -1,3 +1,4 @@
 {
-    "python.linting.pylintEnabled": false
+    "python.linting.pylintEnabled": false,
+    "python.pythonPath": "D:\\tony\\tools\\anaconda3_51\\envs\\pySV4E\\python.exe"
 }
