@@ -1,7 +1,7 @@
 # coding=utf-8
 import os,sys;
 import re
-#import xlrd
+import xlrd
 import os 
 import sys
 import ConfigParser 
@@ -27,6 +27,20 @@ class test_config(object):
         self.age = age
         self.hobbies = ["table tenis"]
     pass
+
+def hex_ex(num):
+    high_byte=hex(num/256)
+    low_byte =hex(num%256)
+    if len(high_byte) == 3:
+        new_h_b="0x0"+high_byte[2]
+    else:
+        new_h_b=high_byte
+
+    if len(low_byte) == 3:
+        new_l_b="0x0"+low_byte[2]
+    else:
+        new_l_b=low_byte
+    return new_h_b+","+new_l_b
 
 def SV4E_Crack(filename):
     cmd_num = 0
@@ -151,7 +165,447 @@ def gx_to_other( filename, out_type):
         file_to_write.writelines(cmd_gx_str) 
     file_to_write.close()
     return "success"
+
+def TXT_to_RAW_CAP(destname,srcname='',TX_NUM="15",RX_NUM="26",dest_start="2",dest_end="48", src_start="0", src_end="RT8",cap_gap=['8','7','15']):
+    str_dest_sample_num = 0
+    str_src_sample_num = 0
+    str_dest_TX = []
+    dest_TX=[]
+    str_src_TX = []
+    src_TX = []
+    str_result = []
+
+    f_dest_TX = []
+    f_src_TX = []
+    f_result = []
+
+    start_new = False
+    start_old = True
+
+    with open(destname, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            if lines[0]=='/' and lines[1]=='/':
+                continue
+            line_pos = lines.find("NG#")
+
+            if line_pos != -1:
+                start_new = True
+                start_old = False
+                str_dest_sample_num+=1
+
+                if len(str_dest_TX) != 0:
+                    dest_TX.append(str_dest_TX)
+                    str_dest_TX=[]
+                    
+                continue
+            
+            if start_new == True and start_old == False:
+                line_data=lines.split('\t')
+                for i in range(1,len(line_data),2):
+                    str_trx=int(line_data[i],16)+int(line_data[i+1],16)*256
+                    str_dest_TX.append(str_trx/1000.0)
+
+            if line_data[0] == dest_end:
+                start_new = False
+                start_old = True                 
+        pass
+    file_to_read.close()
+    dest_TX.append(str_dest_TX)
+
+    start_new = False
+    start_old = True
+    with open(srcname, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            if lines[0]=='/' and lines[1]=='/':
+                continue
+            line_pos = lines.find("Column")
+            if line_pos != -1:
+                continue        
+
+            line_pos = lines.find("Parameters:")
+            if line_pos != -1:
+                start_new = True
+                start_old = False
+                str_src_sample_num+=1
+
+                if len(str_src_TX) != 0:
+                    src_TX.append(str_src_TX)
+                    str_src_TX=[]
+                    
+                continue
+            
+            if start_new == True and start_old == False:
+                line_data=lines.split(':')[1].split(',')
+                for i in range(len(line_data)):
+                    str_trx=line_data[i].strip()
+                    if str_trx=='':
+                        continue
+
+                    str_src_TX.append(float(str_trx))
+
+            if lines.split(':')[0].strip() == src_end:
+                start_new = False
+                start_old = True                 
+        pass
+    file_to_read.close()
+    src_TX.append(str_src_TX)
+
+    tx_n=int(TX_NUM)
+    rx_n=int(RX_NUM)
+    for k in range(str_dest_sample_num):
+        str_trx = "Sample(RAW CAP) #"+str(k+1) +"\t"
+        str_result.append(str_trx)
+        str_trx=''
+        for i in range(int(tx_n)):
+            for j in range(int(rx_n)):
+                str_trx+=str(dest_TX[k][i*rx_n+j+int(dest_start)])+"/"+str(src_TX[k][i*rx_n+j+int(src_start)]) + "/"+\
+                             str(100*(dest_TX[k][i*rx_n+j+int(dest_start)]-src_TX[k][i*rx_n+j+int(src_start)])/src_TX[k][i*rx_n+j+int(src_start)])[0:4]+"%\t"
+        str_trx +="\n"
+        str_result.append(str_trx)
+
+    left_tx_n=int(cap_gap[0])
+    right_tx_n=int(cap_gap[1])
+    gap_limit=int(cap_gap[2])
     
+    err_str_trx='Anayze Raw Cap Gap:\tDS==>DS5 Capature/FL==>Flash Data/x/y/GAP value/Raw Cap Gap Limit='+cap_gap[2]+'%\n'
+    
+    for k in range(str_dest_sample_num):
+        str_trx = "Sample(RAW CAP GAP%) #"+str(k+1) +"\t"
+        str_result.append(str_trx)
+        str_trx=''
+        err_str_trx+="Sample(RAW CAP GAP%) #"+str(k+1) +"\t"
+        err_str_trx_fl=''
+        err_str_trx_ds=''
+        for i in range(1,left_tx_n):
+            for j in range(int(rx_n)):
+                dest_delta = 100*abs((dest_TX[k][(i-1)*rx_n+j+int(dest_start)]-dest_TX[k][i*rx_n+j+int(dest_start)]))/src_TX[k][i*rx_n+j+int(dest_start)]
+                src_delta=100*abs((src_TX[k][(i-1)*rx_n+j+int(src_start)]-src_TX[k][i*rx_n+j+int(src_start)]))/src_TX[k][i*rx_n+j+int(src_start)]
+                str_trx+=str(dest_delta)[0:4]+"/"+\
+                         str(src_delta)[0:4]+"\t"
+
+                if dest_delta >=gap_limit:
+                    err_str_trx_fl+="FL:"+str(k+1)+'/'+str(i-1)+'/'+str(j)+'/'+str(dest_delta)[0:4]+"\t"
+                if src_delta >=gap_limit:
+                    err_str_trx_ds+="DS:"+str(k+1)+'/'+str(i-1)+'/'+str(j)+'/'+str(src_delta)[0:4]+"\t"  
+
+        for i in range(left_tx_n,tx_n-1):
+            for j in range(int(rx_n)):
+                dest_delta =100*abs((dest_TX[k][(i+1)*rx_n+j+int(dest_start)]-dest_TX[k][i*rx_n+j+int(dest_start)]))/src_TX[k][i*rx_n+j+int(dest_start)]
+                src_delta =100*abs((src_TX[k][(i+1)*rx_n+j+int(src_start)]-src_TX[k][i*rx_n+j+int(src_start)]))/src_TX[k][i*rx_n+j+int(src_start)]
+                str_trx+=str(dest_delta)[0:4]+"/"+\
+                         str(src_delta)[0:4]+"\t"  
+
+                if dest_delta >=gap_limit:
+                    err_str_trx_fl+="FL:"+str(k+1)+'/'+str(i-1)+'/'+str(j)+'/'+str(dest_delta)[0:4]+"\t"
+                if src_delta >=gap_limit:
+                    err_str_trx_ds+="DS:"+str(k+1)+'/'+str(i-1)+'/'+str(j)+'/'+str(src_delta)[0:4]+"\t"  
+
+        str_trx +="\n"
+        str_result.append(str_trx)
+        err_str_trx +=err_str_trx_fl+"\n"
+        err_str_trx +='\t'+err_str_trx_ds+"\n"
+
+    err_str_trx +="\n"
+    str_result.append(err_str_trx)
+
+    with open(destname+'_'+cap_gap[2]+"%_result.txt","w") as file_to_write:
+        file_to_write.writelines(str_result) 
+    file_to_write.close()
+
+def CSV_to_E7422( filename, filename1, rgb_ratio=[0.6,0.5,0.6]):
+    cmd_num = 0
+    cmd_gx = []
+    cmd_gx_r = []
+    cmd_gx_g = []
+    cmd_gx_b = []
+    cmd_gx_color=[]
+    cmd_gx_en=[]
+    cmd_gx1 =[]
+    cmd_gx2 =[]
+
+    cmd_reg= []
+    with open(filename, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            if lines[0]=='/' and lines[1]=='/':
+                continue
+            line_pos = lines.find("HBM")
+
+            if line_pos != -1:
+                line_data=lines.split(',')
+                line_pos=line_data[1].find("gray")
+                Gray_Num=int(line_data[1][:line_pos])
+                Reg_R= int(line_data[9])
+                Reg_G= int(line_data[10])
+                Reg_B= int(line_data[11])
+                cmd_reg.append(Gray_Num)
+                cmd_reg.append(Reg_R)
+                cmd_reg.append(Reg_G)
+                cmd_reg.append(Reg_B)
+                cmd_reg.append(1)
+                cmd_gx.append(cmd_reg)
+                cmd_reg =[]
+            else:
+                continue
+        pass
+    file_to_read.close()
+    i = 0
+
+    with open(filename1, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            if lines[0]=='/' and lines[1]=='/':
+                continue
+            line_pos = lines.find("$")
+
+            if line_pos != -1:
+
+                for i in range(13):
+                    if( len(cmd_gx_r) == 13 ):
+                        break
+                    find_str="Red["+str(i)+"]"
+                    line_pos = lines.find(find_str)
+                    if line_pos != -1:
+                        gray_num=i
+                        line_data=lines.split("=")[1].split("/")
+                        Reg_R=int(line_data[0])
+                        cmd_reg.append(i)
+                        cmd_reg.append(Reg_R)
+                        cmd_gx_r.append(cmd_reg)
+                        cmd_reg=[]
+                        break
+
+                if i == 12:
+                    if( len(cmd_gx_r) == 13 ):
+                        continue
+                else:
+                    if( len(cmd_gx_r) == 13 ):
+                        pass #continue
+                    else:
+                        continue
+
+                for i in range(13):
+                    if( len(cmd_gx_g) == 13 ):
+                        break
+                    find_str="Green["+str(i)+"]"
+                    line_pos = lines.find(find_str)
+                    if line_pos != -1:
+                        gray_num=i
+                        line_data=lines.split("=")[1].split("/")
+                        Reg_G=int(line_data[0])
+                        cmd_reg.append(i)
+                        cmd_reg.append(Reg_G)
+                        cmd_gx_g.append(cmd_reg)
+                        cmd_reg=[]
+                        break
+
+                if i == 12:
+                    if( len(cmd_gx_g) == 13 ):
+                        continue
+                else:
+                    if( len(cmd_gx_g) == 13 ):
+                        pass #continue
+                    else:
+                        continue
+
+                for i in range(13):
+                    if( len(cmd_gx_b) == 13 ):
+                        break
+                    find_str="Blue["+str(i)+"]"
+                    line_pos = lines.find(find_str)
+                    if line_pos != -1:
+                        gray_num=i
+                        line_data=lines.split("=")[1].split("/")
+                        Reg_B=int(line_data[0])
+                        cmd_reg.append(i)
+                        cmd_reg.append(Reg_B)
+                        cmd_gx_b.append(cmd_reg)
+                        cmd_reg=[]
+                        break
+
+                if i == 12:
+                    if( len(cmd_gx_b) == 13 ):
+                        continue
+                else:
+                    if( len(cmd_gx_b) == 13 ):
+                        pass #continue
+                    else:
+                        continue
+
+                for i in range(13):
+                    if( len(cmd_gx_color) == 13 ):
+                        break
+                    find_str="Color["+str(i)+"]"
+                    line_pos = lines.find(find_str)
+                    if line_pos != -1:
+                        gray_num=i
+                        line_data=lines.split("=")[1].split("/")
+                        Reg_Color=int(line_data[0])
+                        cmd_reg.append(i)
+                        cmd_reg.append(Reg_Color)
+                        cmd_gx_color.append(cmd_reg)
+                        cmd_reg=[]
+                        break
+
+                if i == 12:
+                    if( len(cmd_gx_color) == 13 ):
+                        continue
+                else:
+                    if( len(cmd_gx_color) == 13 ):
+                        pass #continue
+                    else:
+                        continue 
+
+                for i in range(13):
+                    if( len(cmd_gx_en) == 13 ):
+                        break
+                    find_str="Enable["+str(i)+"]"
+                    line_pos = lines.find(find_str)
+                    if line_pos != -1:
+                        gray_num=i
+                        line_data=lines.split("=")[1].split("/")
+                        Reg_En=int(line_data[0])
+                        cmd_reg.append(i)
+                        cmd_reg.append(Reg_En)
+                        cmd_gx_en.append(cmd_reg)
+                        cmd_reg=[]
+                        break
+
+                if i == 12:
+                    if( len(cmd_gx_en) == 13 ):
+                        continue
+                else:
+                    if( len(cmd_gx_en) == 13 ):
+                        pass #continue
+                    else:
+                        continue
+                        
+            else:
+                continue
+
+
+        pass
+    file_to_read.close()
+
+    cmd_gx1.append(cmd_gx_r)
+    cmd_gx1.append(cmd_gx_g)
+    cmd_gx1.append(cmd_gx_b)
+    cmd_gx1.append(cmd_gx_color)
+    cmd_gx1.append(cmd_gx_en)
+
+
+    cmd_num = cmd_gx_color[6][1]
+    if cmd_gx_en[6][1]==0:
+        Reg_R= cmd_gx_r[6][1]
+        Reg_G= cmd_gx_g[6][1]
+        Reg_B= cmd_gx_b[6][1]
+        cmd_gx2.append([cmd_num,Reg_R,Reg_G,Reg_B,0])            
+    else:
+        for j in range( len(cmd_gx)):
+            if cmd_num == cmd_gx[j][0]:
+                cmd_gx2.append(cmd_gx[j]) 
+
+    for i in range(6):
+        cmd_num = cmd_gx_color[12-i][1]
+        if cmd_gx_en[12-i][1]==0:
+            Reg_R= cmd_gx_r[12-i][1]
+            Reg_G= cmd_gx_g[12-i][1]
+            Reg_B= cmd_gx_b[12-i][1]
+            cmd_gx2.append([cmd_num,Reg_R,Reg_G,Reg_B,0])            
+        else:
+            for j in range( len(cmd_gx)):
+                if cmd_num == cmd_gx[j][0]:
+                    cmd_gx2.append(cmd_gx[j]) 
+                    break
+
+        cmd_num = cmd_gx_color[5-i][1]
+        if cmd_gx_en[5-i][1]==0:
+            Reg_R= cmd_gx_r[5-i][1]
+            Reg_G= cmd_gx_g[5-i][1]
+            Reg_B= cmd_gx_b[5-i][1]
+            cmd_gx2.append([cmd_num,Reg_R,Reg_G,Reg_B,0])            
+        else:
+            for j in range( len(cmd_gx)):
+                if cmd_num == cmd_gx[j][0]:
+                    cmd_gx2.append(cmd_gx[j])
+                    break 
+
+    tuning_r=rgb_ratio[0]
+    tuning_g=rgb_ratio[1]
+    tuning_b=rgb_ratio[2]
+
+    for i in range(12):
+        if cmd_gx2[11-i][4]==0:
+            cmd_gx2[11-i][1]=int(cmd_gx2[12-i][1]*tuning_r)
+            cmd_gx2[11-i][2]=int(cmd_gx2[12-i][2]*tuning_g)
+            cmd_gx2[11-i][3]=int(cmd_gx2[12-i][3]*tuning_b)
+
+    cmd_gx2[0][1]=cmd_gx2[0][2]=cmd_gx2[0][3]=0
+
+    R_str = hex_ex(cmd_gx2[0][1])#hex(cmd_gx2[0][1]/256)+','+hex(cmd_gx2[0][1]%256)
+    G_str = hex_ex(cmd_gx2[0][2])#hex(cmd_gx2[0][2]/256)+','+hex(cmd_gx2[0][2]%256)
+    B_str = hex_ex(cmd_gx2[0][3])#hex(cmd_gx2[0][3]/256)+','+hex(cmd_gx2[0][3]%256)
+
+    for i in range(1,12,1):
+        Gray_Num = cmd_gx2[i][0]*4+cmd_gx2[i][0]/64
+        R_str+=','+ hex_ex(Gray_Num) #hex(Gray_Num/256)+','+hex(Gray_Num%256)
+        R_str+=','+ hex_ex(cmd_gx2[i][1])#hex(cmd_gx2[i][1]/256)+','+hex(cmd_gx2[i][1]%256)
+        G_str+=','+ hex_ex(Gray_Num)#hex(Gray_Num/256)+','+hex(Gray_Num%256)
+        G_str+=','+ hex_ex(cmd_gx2[i][2])#hex(cmd_gx2[i][2]/256)+','+hex(cmd_gx2[i][2]%256)
+        B_str+=','+ hex_ex(Gray_Num)#hex(Gray_Num/256)+','+hex(Gray_Num%256)
+        B_str+=','+ hex_ex(cmd_gx2[i][3])#hex(cmd_gx2[i][3]/256)+','+hex(cmd_gx2[i][3]%256)
+    R_str +=','+hex_ex(cmd_gx2[12][1])#hex(cmd_gx2[12][1]/256)+','+hex(cmd_gx2[12][1]%256)
+    G_str +=','+hex_ex(cmd_gx2[12][2])#hex(cmd_gx2[12][2]/256)+','+hex(cmd_gx2[12][2]%256)
+    B_str +=','+hex_ex(cmd_gx2[12][3])#hex(cmd_gx2[12][3]/256)+','+hex(cmd_gx2[12][3]%256)
+
+    line_mipi_data_gx_str="REGS.WRITE(0,0x39,0xCB,"+ R_str+','+G_str+','+B_str+')\n'
+    cmd_gx_str.append(line_mipi_data_gx_str)   
+    cmd_gx_str.append(R_str+'\n')   
+    cmd_gx_str.append(G_str+'\n')   
+    cmd_gx_str.append(B_str+'\n')   
+
+
+    with open(filename+"_E7422.txt","w") as file_to_write:
+        file_to_write.writelines(cmd_gx_str) 
+    file_to_write.close()
+    return "success"
+
 def excel_to_jig( filename, out_type ):
     XL_row_start=7
     XL_col_start=5
@@ -494,6 +948,74 @@ def usage_tools():
     \nB3D TXT file:B3D read format to B3D board. \
     \nE_2_B Elecs_txt_file:Elecs board to BOE. \
     \nREG_A Elecs_txt_file:analzye the register setting.\n")
+
+def ImageStudio_to_other( filename="", mode="BOE_W7", cmd_head="REGS.WRITE" ):
+    if filename == '':
+        usage_E7422_to_BOE()
+        return "Fail"
+    line_mipi_data_gx_str = ""
+    with open(filename, 'r') as file_to_read:
+        while True:
+            lines = file_to_read.readline() # 整行读取数据
+            if not lines:
+                break
+                pass
+            lines=lines.strip()
+            if lines =='':
+                continue
+            if lines[0]=='#':
+                continue
+            line_pos = lines.find("#")
+            if line_pos != -1:
+                lines = lines[:line_pos]
+            
+            line_pos = lines.find("Bank")
+            if line_pos != -1:
+                line_use = lines.split('=')[1]
+                line_use=line_use.strip()
+
+                if line_use == '1':
+                    if mode == "BOE_W7":
+                        line_mipi_data_gx_str=cmd_head+'(0,0x29,0xB0,0x00);\n'
+                    elif mode == "SYNA_FHD":
+                        line_mipi_data_gx_str=cmd_head+' 0x29 0xB0 0x00\n'
+                else:
+                    if mode == "BOE_W7":
+                        line_mipi_data_gx_str=cmd_head+'(0,0x29,0xB0,0x00);\n'
+                    elif mode == "SYNA_FHD":
+                        line_mipi_data_gx_str=cmd_head+' 0x29 0xB0 0x00\n'
+
+
+                cmd_gx_str.append(line_mipi_data_gx_str)                
+                continue
+
+            else :
+                line_pos = lines.find("0x")
+                if line_pos != -1 :
+                    line_use=lines.strip()
+                    line_data=line_use.split()
+                    tmp_str=re.compile('\t')
+                    line_elecs_data_sub=tmp_str.sub(' ',line_use)
+                    tmp_str=re.compile('\t')
+                    line_mipi_data_sub=tmp_str.sub(',',line_use) 
+                else:
+                    continue
+
+                cmd_7422.append(line_data)
+                if mode == "BOE_W7":
+                    line_mipi_data_gx_str=cmd_head+'(0,0x39,'+line_mipi_data_sub+')\n'
+                elif mode == "SYNA_FHD":
+                    line_mipi_data_gx_str=cmd_head+' 0x39 '+line_elecs_data_sub+'\n'
+
+                cmd_gx_str.append(line_mipi_data_gx_str)   
+        pass
+
+    file_to_read.close()
+    with open(filename.split('.txt')[0]+"_Syna2"+mode+".txt","w") as file_to_write:
+        file_to_write.writelines(cmd_gx_str) 
+
+    file_to_write.close()
+    return "success"
 
 def E7422_to_BOE( filename="", mode="BOE_W7", cmd_head="REGS.WRITE" ):
     if filename == '':
@@ -1868,7 +2390,9 @@ if __name__ == '__main__':
     #p1,p2=get_src_file()
     #Compare_E7422( p1, p2 )
     #BOE_to_other(p1,p2)
-    
+
+    #CSV_to_E7422(sys.argv[2],sys.argv[3],"E7422")    
+
     #reg_analyze()
     #factory_test()
     #'''for convert Elecs to BOE
@@ -1877,7 +2401,26 @@ if __name__ == '__main__':
     if argv!=1:
         if sys.argv[1] == "B_2_E":
             BOE_to_other(sys.argv[2])
-        if sys.argv[1] == "B3D":
+        elif sys.argv[1] == "Excel":
+            if argv == 4:
+                CSV_to_E7422(sys.argv[2],sys.argv[3])
+            elif argv ==7:
+                CSV_to_E7422(sys.argv[2],sys.argv[3],[float(sys.argv[4]),float(sys.argv[5]),float(sys.argv[6])])
+        elif sys.argv[1] == "IM_2_E":
+            if argv == 4:
+                ImageStudio_to_other(sys.argv[2],sys.argv[3])
+            elif argv ==3:
+                ImageStudio_to_other(sys.argv[2])
+            elif argv ==5:
+                ImageStudio_to_other(sys.argv[2],sys.argv[3],sys.argv[4])
+            
+               
+        elif sys.argv[1] == "CS2RAWCAP":
+            if argv == 4:
+                TXT_to_RAW_CAP(sys.argv[2],sys.argv[3])
+            elif argv == 3:
+                TXT_to_RAW_CAP(sys.argv[2])            
+        elif sys.argv[1] == "B3D":
             BOE_to_B3D(sys.argv[2])
         elif sys.argv[1] == "E_2_B":
             if argv == 5:
@@ -1900,13 +2443,16 @@ if __name__ == '__main__':
             print("Error: no any command!")
     else:
         usage_E7422_to_BOE()
-    #'''
+
+
     #compare the some register
     #reg_data=E7422_to_gx(sys.argv[1], ["0xCF","0xD7"])
 
     #r66451=reg_file("R66451","./reg_map_R66451.txt")
     #r66451.read_reg_struc_file("./reg_map_R66451.txt")
-    '''for convert Elecs to BOE
+
+    #for convert Elecs to BOE
+"""
     if len(sys.argv)!=1:
         BOE_to_other(sys.argv[1])
         if len(sys.argv)==2:
@@ -1918,7 +2464,7 @@ if __name__ == '__main__':
     #    E7422_to_BOE(sys.argv[1],sys.argv[2],sys.argv[3])
     else:
         usage_E7422_to_BOE()
-    '''
+"""
     #reg_process_0xCF(reg_data)
     #reg_data=E7422_to_gx(sys.argv[1], "0xD7")
     #reg_process_0xD7(reg_data)

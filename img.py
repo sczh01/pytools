@@ -237,7 +237,170 @@ class Graphics:
                 print('\nMessage:Font is samll or disable Font.\n')
 
         newIm.save(outfile)
+
+    @classmethod  
+    def draw_box(cls,outfile,param=[2160,2480,3,72],c=[(255,255,255),(0,255,0),(255,0,0)],c_font=(0,255,0),msg="Out Box",pic_mode="RGB",pic_data=(0,0,0),isFont=True,customer=[]):
+
+        w,h,step,FontSize=param[0],param[1],param[2],param[3]
+        x = y = 0
+
+        #build the draw list. 
+        if not os.path.exists(outfile): 
+            newIm = Image.new(pic_mode, (w, h), pic_data)  
+        else:
+            newIm = Image.open(outfile)
+            if (w,h) != newIm.size:
+                print("\n Size is not match!")
+                return
+
+        drawIm=ImageDraw.Draw(newIm)
+        draw_list=[]
+        draw_line=[]
+        j=0
+
+        for i in range(step): 
+            draw_line.append((i,i))
+            draw_line.append((w-1-i,i))
+            draw_line.append(c[i])
+            draw_list.append(draw_line)
+            draw_line=[] #add TOP
+
+            draw_line.append((i,h-1-i))
+            draw_line.append((w-1-i,h-1-i))
+            draw_line.append(c[i])
+            draw_list.append(draw_line)
+            draw_line=[] #add Bottom       
+
+            draw_line.append((i,i))
+            draw_line.append((i,h-1-i))
+            draw_line.append(c[i])
+            draw_list.append(draw_line)
+            draw_line=[] #add Left 
+
+            draw_line.append((w-1-i,i))
+            draw_line.append((w-1-i,h-1-i))
+            draw_line.append(c[i])
+            draw_list.append(draw_line)
+            draw_line=[] #add Right      
         
+        for i in range(len(draw_list)):
+            drawIm.line((draw_list[i][0],draw_list[i][1]),draw_list[i][2])
+
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", FontSize )       
+        drawIm.text((w/4,h/2),msg+" "+str(step)+" line",c_font,font=ttFont)
+
+
+        newIm.save(outfile)
+        #newIm.close()
+
+    @classmethod  
+    def draw_piont(cls,outfile,param=[1440,2992,3,72],c=[(255,255,255),(0,255,0),(255,0,255)],c_font=(0,255,0),msg="Dot",pic_mode="RGB",pic_data=(0,0,0),isFont=True,customer=[]):
+
+        w,h,step,FontSize=param[0],param[1],param[2],param[3]
+        x = y = 0
+
+        #build the draw list. 
+        if not os.path.exists(outfile): 
+            newIm = Image.new(pic_mode, (w, h), pic_data)  
+        else:
+            newIm = Image.open(outfile)
+            if (w,h) != newIm.size:
+                print("\n Size is not match!")
+                return
+
+        drawIm=ImageDraw.Draw(newIm)
+        for i in range(h):
+            for j in range(0,w,2):
+                if i%2==0:
+                    drawIm.point((j,i),c[1])
+                    drawIm.point((j+1,i),c[2])
+                else:
+                    drawIm.point((j,i),c[2])
+                    drawIm.point((j+1,i),c[1])
+
+
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", FontSize )       
+        drawIm.text((w/4,h/2),msg+" "+str("Mode 0xff00ff00"),c_font,font=ttFont)
+
+
+        newIm.save(outfile)
+        #newIm.close()
+    @classmethod  
+    def draw_pattern(cls,outfile,cmd,param=[1440,2992,3,72],c=[(255,255,255),(0,255,0),(255,0,255)],c_font=(0,255,0),msg="Dot",pic_mode="RGB",pic_data=(0,0,0)):
+
+        w,h,step,FontSize=param[0],param[1],param[2],param[3]
+        x = y = 0
+
+        #build the draw list. 
+        if not os.path.exists(outfile): 
+            newIm = Image.new(pic_mode, (w, h), pic_data)  
+        else:
+            newIm = Image.open(outfile)
+            if (w,h) != newIm.size:
+                print("\n Size is not match!")
+                return
+
+        drawIm=ImageDraw.Draw(newIm)
+        for i in range(h):
+            for j in range(0,w,2):
+                if i%2==0:
+                    drawIm.point((j,i),c[1])
+                    drawIm.point((j+1,i),c[2])
+                else:
+                    drawIm.point((j,i),c[2])
+                    drawIm.point((j+1,i),c[1])
+
+
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", FontSize )       
+        drawIm.text((w/4,h/2),msg+" "+str("Mode 0xff00ff00"),c_font,font=ttFont)
+
+
+        newIm.save(outfile)
+
+    @classmethod  
+    def draw_ellipse(cls,outfile,param=[2160,2480,1000,1000,600,360,100,1800,120],c=[(0,255,255),(255,255,0)],c_font=(0,255,0),msg="Ellipse",pic_mode="RGB",pic_data=(0,0,0)):
+        w,h,x,y,w_x,h_y,x_f,y_f,FontSize=param[0],param[1],param[2],param[3],param[4],param[5],param[6],param[7],param[8]
+        #build the draw list. 
+        if not os.path.exists(outfile): 
+            newIm = Image.new(pic_mode, (w, h), pic_data)  
+        else:
+            newIm = Image.open(outfile)
+            if (w,h) != newIm.size:
+                print("\n Size is not match!")
+                return
+
+        drawIm=ImageDraw.Draw(newIm)
+        if x-w_x/2 >= 0 and y-h_y/2 >= 0 and  x+w_x/2 <=w and y+h_y/2 <=h:
+            drawIm.ellipse((x-w_x/2, y-h_y/2, x+w_x/2, y+h_y/2), fill =c[0], outline =c[1])
+
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", FontSize )       
+        drawIm.text((x_f,y_f),msg+":W="+str(w_x)+"/H="+str(h_y),c_font,font=ttFont)
+
+        newIm.save(outfile)
+        newIm.close()
+
+    @classmethod  
+    def draw(cls,*param):
+        w,h,x,y,w_x,h_y,x_f,y_f,FontSize=param[0],param[1],param[2],param[3],param[4],param[5],param[6],param[7],param[8]
+        #build the draw list. 
+        if not os.path.exists(outfile): 
+            newIm = Image.new(pic_mode, (w, h), pic_data)  
+        else:
+            newIm = Image.open(outfile)
+            if (w,h) != newIm.size:
+                print("\n Size is not match!")
+                return
+
+        drawIm=ImageDraw.Draw(newIm)
+        if x-w_x/2 >= 0 and y-h_y/2 >= 0 and  x+w_x/2 <=w and y+h_y/2 <=h:
+            drawIm.ellipse((x-w_x/2, y-h_y/2, x+w_x/2, y+h_y/2), fill =c[0], outline =c[1])
+
+        ttFont = ImageFont.truetype("C:\\WINDOWS\\Fonts\\simsun.ttc", FontSize )       
+        drawIm.text((x_f,y_f),msg+":W="+str(w_x)+"/H="+str(h_y),c_font,font=ttFont)
+
+        newIm.save(outfile)
+        newIm.close()
+
     @classmethod  
     def draw_pic(cls,filename, outfile,w,h,op_mode,sub_op_mode,param=[8,[256,1,0,255],0,1],pic_mode="RGB",pic_data=(0,0,0)):
         cls.infile = filename
@@ -292,6 +455,7 @@ class Graphics:
                             drawIm.text((0+(i/step%4)*200,(i-(end_g-last*step+step))*seg_len/step+start_y),"gray_"+str(i),(255,0,0),font=ttFont)
                          
                 newIm.save(outfile)
+                newIm.close()
 
 
     @classmethod  
@@ -360,6 +524,24 @@ def ReadIni(path,section,option):#文件路径，章节，关键词
     cf.read(path) 
     value=cf.get(section,option)#如果用getint()则直接读取该数据类型为整数 
     return value 
+
+def WriteIni(path,section,option):#文件路径，章节，关键词 
+    #读取ini
+    if sys.version_info < (3, 0):
+        cf=ConfigParser.ConfigParser() 
+    else:  
+        cf=configparser.ConfigParser()  
+
+    cf.read(path) 
+    value=cf.set(section,option)#如果用getint()则直接读取该数据类型为整数 
+    return value
+
+def FindSliceHeight(Height,rng=[21,39]):
+    for i in range(rng[0],rng[1],1):
+        newHeight = (Height%i)
+        if newHeight == 0:
+            return i
+    return 0
 '''
 <How to use>
 
@@ -422,7 +604,6 @@ def image_operation( inifile='',bypass=''):
         IniPath=os.getcwd()+'//'+PyName+'.ini'
     else:    
         IniPath = inifile
-
     SrcPath=ReadIni(IniPath,PyName,'SrcPath')#源文件夹 
     DescPath=ReadIni(IniPath,PyName,'DescPath')#目的文件夹
     op_type =ReadIni(IniPath,PyName,'OP_TYPE')#Operation type 
@@ -432,6 +613,7 @@ def image_operation( inifile='',bypass=''):
     TOOL_DSC=DSC_TOOL_Path+"/"+ReadIni(IniPath,PyName,'TOOL_DSC')
     TOOL_PPS=DSC_TOOL_Path+"/"+ReadIni(IniPath,PyName,'TOOL_PPS')
     LIST_FILE=DSC_TOOL_Path+"/"+ReadIni(IniPath,PyName,'LIST_FILE')
+    CONFIG_FILE=DSC_TOOL_Path+"/"+ReadIni(IniPath,PyName,'CONFIG_FILE')#源文件夹 
     MID_FILE_FORMAT=ReadIni(IniPath,PyName,"MID_FILE_FORMAT")
     SUFFIX=ReadIni(IniPath,PyName,"SUFFIX")
     IMG_HEGHT=ReadIni(IniPath,PyName,"IMG_HEGHT")
@@ -472,6 +654,23 @@ def image_operation( inifile='',bypass=''):
             file_to_write.writelines("\n")
     file_to_write.close()
 
+    with open(CONFIG_FILE,"w") as file_to_write: #write config.ini for dsc
+        WriteIni(CONFIG_FILE,"MODE","8bpc8bpp")
+        WriteIni(CONFIG_FILE,"PICT_HEIGHT",str(IMG_HEGHT))
+        WriteIni(CONFIG_FILE,"PICT_WIDTH",str(IMG_WIDTH))
+        WriteIni(CONFIG_FILE,"SLICE_WIDTH",str(IMG_WIDTH/2))
+
+        SliceHeight = FindSliceHeight(IMG_HEGHT)
+        if SliceHeigh:
+            WriteIni(CONFIG_FILE,"SLICE_HEIGHT","8bpc8bpp")
+        else:
+            print("DSC config error: can't find slice Height!\n")
+
+        WriteIni(CONFIG_FILE,"BLOCK_PRED_ENABLE","1")
+
+
+    file_to_write.close()
+
     for file in FileList: #
         if bypass=='yes':
             newfile=file.split("."+FILE_TYPE)[0]+SUFFIX
@@ -506,6 +705,9 @@ def image_operation( inifile='',bypass=''):
 
 if __name__ == '__main__':
     argv_num=len(sys.argv)
+    #Graphics.draw_box( "out_box.bmp")
+    #Graphics.draw_ellipse("ellipse.bmp")
+    #Graphics.draw_piont("dot.bmp")
 
     if argv_num == 2:
         if sys.argv[1] == "DSC":
@@ -516,9 +718,32 @@ if __name__ == '__main__':
         if sys.argv[1] == "SPLIT":
             #Graphics.splitimage("1.bmp",1,2,1080,2480)
             Graphics.splitimage(sys.argv[2], int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]))
-        elif sys.argv[1] == "JOIN":
-            #Graphics.img_file_join("D:\\tony\\tools\\pytools\\syna\\DSC\\join", 1080,2,2160,2480 )
-            Graphics.img_file_join(sys.argv[2], int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]) )
+        elif sys.argv[1] == "DRAW":
+            """draw( cmd, sub_cmd, param1..n )
+            cmd:  sub_cmd
+            color: null
+            div:  null
+            color.bar V/H
+            grad  V/H/alash inc/dec
+            line.edge null
+            box   null
+            check 
+            line H/V
+            Example:
+            color 0xff0000
+            div 2,2,0x9f9f9f,0x7f7f7f,0x5f5f5f,0x3f3f3f
+            color.bar vert,0xff0000,0x00ff00,0x0000ff
+            grad vert-inc,0xff0000                      grad.bar vert-inc,0xff0000,0x00ff00,0x0000ff
+            grad vert-inc,0xffffff
+            line.edge 0xffffff,0x000000
+            grad.slash left-dec,0xffffff
+            box 0x7f7f7f,0.25,0.25,0.75,0.75,0xffffff
+            check 1,1,0xffffff,0x000000                  check 90,160,0xffffff,0x000000
+            line horz,1,0x000000,0x7f7f7f                line vert,1,0x000000,0xffffff
+            line horz,10,0xff0000,0x00ff00,0x0000ff            
+            """
+            Graphics.draw(sys.argv[2], int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]) )
+
         elif sys.argv[1] == "JOIN":
             #Graphics.img_file_join("D:\\tony\\tools\\pytools\\syna\\DSC\\join", 1080,2,2160,2480 )
             Graphics.img_file_join(sys.argv[2], int(sys.argv[3]),int(sys.argv[4]),int(sys.argv[5]),int(sys.argv[6]) )
